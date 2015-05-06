@@ -2,6 +2,6 @@ test commit
 
 this is the second set of changes
 
-changing
+this is a bug..
 
 okay im changing this line now at 9:30am
