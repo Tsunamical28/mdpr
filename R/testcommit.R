@@ -3,25 +3,3 @@ test commit
 this is the second set of changes
 
 this is a bug..
-
-okay im changing this line now at 9:30am
-
-
-this change is made from the wong branch
-
-##############################hotfix
-
-add random stuff at hotfix2 end
-
-
-
-#this is a change by the master branch at 5/11/20152 8:32AM
-#hotfix2
-
-Here i make more changes on master to see if the other branch can catchup
-
-So now that im latest copy master in hotfox, i make more change
-
-this is back to hotfix
-
-another push
