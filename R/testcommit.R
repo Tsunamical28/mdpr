@@ -19,3 +19,5 @@ add random stuff at hotfix2 end
 #hotfix2
 
 Here i make more changes on master to see if the other branch can catchup
+
+So now that im latest copy master in hotfox, i make more change
