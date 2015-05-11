@@ -15,5 +15,7 @@ add random stuff at hotfix2 end
 
 
 
-#this is a change by the master branch at 5/11/2015 8:32AM
+#this is a change by the master branch at 5/11/20152 8:32AM
 #hotfix2
+
+Here i make more changes on master to see if the other branch can catchup
