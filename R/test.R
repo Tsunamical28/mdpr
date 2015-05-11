@@ -1,7 +1,1 @@
-#just a testing file
-
-#test commit from master branch
-
-#dash was here
-
-#one more time
+#all other nonsense is gone.
