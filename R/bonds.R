@@ -8,7 +8,7 @@
 #' @param freq  Cashflow frequency (number of periods per year)
 #' @param redemption  Redemption value or par amount
 #' @return  Vector of cashflow amounts of length \code{num} whose last value is
-#'    \deqn{\code{redemption} + \frac{\code{coupon}}{\code{freq}}}
+#'    \eqn{redemption + \frac{coupon}{freq}}{redemption + coupon / freq}
 #' @examples
 #' create_cf_amounts(20, 5, 2, 100)
 #' @export
