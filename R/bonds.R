@@ -20,7 +20,6 @@ create_cf_amounts <- function(num, coupon, freq, redemption = 100){
 }
 
 
-#Test
 create_cashflows <- function(maturity, coupon, settle, conv = "30/360", 
                              freq = 2, redemption = 100, id = NULL){
   maturity <- safe_ifelse(is.Date(maturity), maturity,
