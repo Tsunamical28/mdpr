@@ -2,3 +2,6 @@
 
 export(create_cf_amounts)
 export(round_any_vec)
+importFrom(NMOF,DEopt)
+importFrom(NMOF,TAopt)
+importFrom(plyr,round_any)

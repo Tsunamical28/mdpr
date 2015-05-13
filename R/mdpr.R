@@ -10,4 +10,8 @@
 #'
 #' @docType package
 #' @name mdpr
+#' 
+#' @importFrom NMOF DEopt TAopt
+#' @importFrom plyr round_any
+
 NULL
