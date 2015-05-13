@@ -2,7 +2,11 @@
 
 export(acc_int)
 export(bond)
+export(coalesce)
 export(create_cashflows)
 export(create_cf_amounts)
+export(round_any_vec)
+export(safe_ifelse)
 importFrom(NMOF,DEopt)
 importFrom(plyr,round_any)
+importFrom(zoo,is.Date)

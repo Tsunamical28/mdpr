@@ -32,6 +32,6 @@ dates passed in confrom to the convention that \code{settle} is between
 \code{accrual_start} and \code{next_coupon}.
 }
 \examples{
-acc_int("2015-01-15", "2015-03-07", )
+acc_int("2015-01-15", "2015-03-07", "2015-07-15", "30/360", 2)
 }
 

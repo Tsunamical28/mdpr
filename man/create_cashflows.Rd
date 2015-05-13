@@ -14,7 +14,8 @@ create_cashflows(maturity, coupon, settle, conv = "30/360", freq = 2,
 
 \item{settle}{Settlement date}
 
-\item{conv}{Daycount convention (one of "30/360", "Act/Act", or "Act/365")}
+\item{conv}{Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+or \code{"Act/365"})}
 
 \item{freq}{Coupon frequency (number of periods per year)}
 
