@@ -16,4 +16,5 @@ safe_ifelse <- function(cond, yes, no){
   } else no
 }
 
-round_any_vec <- Vectorize(plyr::round_any, c("x"))
+#' @export
+round_any_vec <- Vectorize(round_any, c("x"))
