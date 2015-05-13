@@ -10,8 +10,8 @@
 #'
 #' @docType package
 #' @name mdpr
-#' 
-#' @importFrom NMOF DEopt TAopt
 #' @importFrom plyr round_any
+#' @importFrom NMOF DEopt
+#' @importFrom zoo is.Date
 
 NULL

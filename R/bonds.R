@@ -19,7 +19,28 @@ create_cf_amounts <- function(num, coupon, freq, redemption = 100){
   cfs
 }
 
-
+#' Create \code{tbl_df} of Cashflows for a Given Workout/Maturity Date
+#' 
+#' If a bond has a list of potential workout dates such as a call schedule, this
+#' procedure will be called for each workout date. Dates can be passed as R date
+#' types or can be in \code{ymd} or \code{mdy} form with any of the common 
+#' delimiters used in lubridate. The function is vectorized and if you don't pass
+#' in an "id," normally the CUSIP, the integers 1 to N will be used where N is
+#' the number of workout dates. 
+#' 
+#' @param maturity Maturity/Workout date
+#' @param coupon  Annnual coupon amount
+#' @param settle Settlement date
+#' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+#'  or \code{"Act/365"})
+#' @param freq  Coupon frequency (number of periods per year)
+#' @param redemption  Redemption value or par amount
+#' @param id CUSIP or other id to be used as an identifier in the returned tbl_df
+#' @return  tbl_df with cashflows counting back to the coupon date before settle.
+#'          Columns are (id, cashflow date, cashflow amount)
+#' @examples
+#' create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100, "ABCD")
+#' @export
 create_cashflows <- function(maturity, coupon, settle, conv = "30/360", 
                              freq = 2, redemption = 100, id = NULL){
   maturity <- safe_ifelse(is.Date(maturity), maturity,
@@ -64,8 +85,38 @@ create_cashflows <- function(maturity, coupon, settle, conv = "30/360",
 }
 
 
+# Bond Constructor --------------------------------------------------------
+
+#' Create \code{bond} Object
+#' 
+#' Given basic bond details like maturity date, call date and price (if callable),
+#' coupon, frequency, settle, daycount convention, and cusip (or any id),
+#' this will create an object of type \code{bond}. The constructor can take a 
+#' \code{cfs} object, which, if passed, should be a list of \code{tbl_df}s, where each
+#' one has a name that means something. e.g. \code{cfs$maturity}, \code{cfs$call},
+#' \code{cfs$put} etc. \code{bond} is the basic object in this package. It is used
+#' to calculate prices, yields, risk metrics, and do any other kind of fixed 
+#' income analysis.
+#' 
+#' @param maturity Maturity/Workout date
+#' @param coupon  Annnual coupon amount
+#' @param dated_date Dated date, usually the issue date and the day from which
+#'    interest accrues.
+#' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+#'  or \code{"Act/365"})
+#' @param freq  Coupon frequency (number of periods per year)
+#' @param redemption  Redemption value or par amount
+#' @param cfs List of cashflow tbl_dfs (id, cf_date, cf_amount)
+#' @param cusip CUSIP or other id
+#' @return  \code{bond} object with cashflows
+#' @examples
+#' bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, "ABCD")
+#' bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, "ABCD",
+#'      call_date = "2025-02-15", call_px = 101)
+#' @export
 bond <- function(maturity, coupon, dated_date, conv = "30/360", freq = 2, 
-                 cfs = NULL, cusip = NULL, call_date = NULL, call_px = NULL){
+                 redemption = 100, cfs = NULL, cusip = NULL,
+                 call_date = NULL, call_px = NULL){
   if(!(conv %in% c("30/360", "Act/Act", "Act/365")))
     stop("Day count convention not supported.")
   maturity <- safe_ifelse(is.Date(maturity), maturity,
@@ -86,7 +137,7 @@ bond <- function(maturity, coupon, dated_date, conv = "30/360", freq = 2,
   
   if(is.null(cfs)){
     cfs_maturity <- create_cashflows(maturity, coupon, dated_date, conv, freq,
-                                     id = cusip)
+                                     redemption, id = cusip)
     if(!is.null(call_date))
     {
       cfs_call <- create_cashflows(call_date, coupon, dated_date, conv, freq, 
@@ -105,18 +156,44 @@ bond <- function(maturity, coupon, dated_date, conv = "30/360", freq = 2,
   }
   
   bond <- list(cusip = cusip, maturity = maturity, coupon = coupon, 
-               dated_date = dated_date, conv = conv,
-               freq = freq, cfs = cfs, call_date = call_date, 
+               dated_date = dated_date, conv = conv, freq = freq, 
+               cfs = cfs, call_date = call_date, 
                call_px = call_px)
   
   class(bond) <- "bond"
   return(bond)
 }
 
+# Pricing Functions --------------------------------------------------------
+
+#' Calculate Accrued Interest
+#' 
+#' Bonds typically trade based on a "clean price," which does not include
+#' accrued interest. To calculate yields etc. "dirty price" must first be 
+#' calculated by including accrued interest. This function assumes that the
+#' dates passed in confrom to the convention that \code{settle} is between
+#' \code{accrual_start} and \code{next_coupon}.
+#' 
+#' @param accrual_start Accrual start date
+#' @param settle  Settlement Date (R Date type or )
+#' @param next_coupon  Next coupon date
+#' @param coupon Annual coupon amount
+#' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+#'  or \code{"Act/365"})
+#' @param freq  Coupon frequency (number of periods per year)
+#' @return Accrued Interest for a par amount of 100
+#' @examples
+#' acc_int("2015-01-15", "2015-03-07", "2015-07-15", "30/360", 2)
+#' @export
 acc_int <- function(accrual_start, settle, next_coupon, coupon,
                     conv = "30/360", freq = 2){    
+  accrual_start <- safe_ifelse(is.Date(accrual_start), accrual_start,
+                        as.Date(parse_date_time(accrual_start, c("ymd","mdy"))))
   settle <- safe_ifelse(is.Date(settle), settle,
                         as.Date(parse_date_time(settle, c("ymd","mdy"))))
+  next_coupon <- safe_ifelse(is.Date(next_coupon), next_coupon,
+                        as.Date(parse_date_time(next_coupon, c("ymd","mdy"))))
+  
   daysinyear <- days_in_year(settle, conv)
   
   if(conv == "Act/Act"){
@@ -173,7 +250,7 @@ discount_cfs_single <- function(cfs, settle, yield = NULL, conv = "30/360", freq
                             dv01 = moddur * dirty_px/100,
                             convexity = (1 / dirty_px) * 1 / (1 + yield / freq)^2 *
                               PV * ((year_frac * freq)^2 +
-                                      year_frac * freq) / freq^2 /10000)
+                                      year_frac * freq) /  freq^2 /10000)
     }
   }
   else{

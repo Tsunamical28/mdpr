@@ -39,7 +39,6 @@ safe_ifelse <- function(cond, yes, no){
   structure(ifelse(cond, yes, no), class = class(yes))
 }
 
-
 #' Vectorized function for rounding to multiple of any number
 #' 
 #' Vectorized version of \code{plyr::round_any}, which is a function that rounds 
@@ -51,11 +50,5 @@ safe_ifelse <- function(cond, yes, no){
 #' @examples
 #' round_any_vec(c(52,199,14),10)
 #' @export
-round_any_vec <- Vectorize(plyr::round_any, c("x","accuracy"))
-
-
-
-
-
-
+round_any_vec <- Vectorize(round_any, c("x","accuracy"))
 
