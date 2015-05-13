@@ -26,6 +26,8 @@ coalesce <- function(...){
 #' a Date type vector is passed as an argument, Dates lose their class when the 
 #' condition is evaluated. The resulting vector is of type numeric. 
 #' This function \code{safe_ifelse} restores the normal behavior for Date vectors.
+#' Users can specify whether to coerce to any class or the default will be used
+#' which is \code{class(no)}.
 #' 
 #' @param cond the test to determine if yes/no
 #' @param yes the value or operation to return if \code{cond} evaluates to \code{TRUE}
@@ -35,8 +37,8 @@ coalesce <- function(...){
 #' d = as.Date(c('2015-01-01','2015-08-08'))
 #' safe_ifelse(d=='2015-01-01',d-10,d)
 #' @export
-safe_ifelse <- function(cond, yes, no){
-  structure(ifelse(cond, yes, no), class = class(yes))
+safe_ifelse <- function(cond, yes, no, class_to_use = class(no)){
+  structure(ifelse(cond, yes, no), class = class_to_use)
 }
 
 
