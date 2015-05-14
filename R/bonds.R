@@ -729,7 +729,7 @@ calc_dv01 <- function(x, ...){
   UseMethod("calc_dv01")
 }
 
-#' @rdname calc_dv01
+#' @rdname calc_risk
 #' @export
 calc_dv01.default <- function(maturity, settle, coupon, price_yield, 
                               input_type = "Y", conv = "30/360", 
@@ -742,7 +742,7 @@ calc_dv01.default <- function(maturity, settle, coupon, price_yield,
   dv01
 }
 
-#' @rdname calc_dv01
+#' @rdname calc_risk
 #' @export
 calc_dv01.bond <- function(b, settle, price_yield,
                              input_type = "Y"){

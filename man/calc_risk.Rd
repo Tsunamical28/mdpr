@@ -2,6 +2,8 @@
 % Please edit documentation in R/bonds.R
 \name{calc_risk}
 \alias{calc_dv01}
+\alias{calc_dv01.bond}
+\alias{calc_dv01.default}
 \alias{calc_risk}
 \alias{calc_risk.bond}
 \alias{calc_risk.default}
@@ -16,6 +18,11 @@ calc_risk(x, ...)
   returnCFs = FALSE)
 
 calc_dv01(x, ...)
+
+\method{calc_dv01}{default}(maturity, settle, coupon, price_yield,
+  input_type = "Y", conv = "30/360", freq = 2)
+
+\method{calc_dv01}{bond}(b, settle, price_yield, input_type = "Y")
 }
 \arguments{
 \item{maturity}{Maturity/Workout date}
