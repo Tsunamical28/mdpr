@@ -722,5 +722,3 @@ calc_dv01.bond <- function(b, settle, price_yield,
   
   round(dv01, 8)
 }
-
-
