@@ -706,7 +706,7 @@ calc_risk.bond <- function(b, settle, price_yield,
   }
   else
   {
-    risk <- lapply(cfs, dv01_cfs_single, settle, yield, conv, freq, TRUE)
+    risk <- lapply(cfs, risk_cfs_single, settle, yield, conv, freq, TRUE)
     dirty_px <- lapply(mapply(`[[`, risk, "PV"), sum)
     worst_index <- which.min(dirty_px)
     worst_type <- names(dirty_px)[worst_index]
