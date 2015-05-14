@@ -232,8 +232,10 @@ discount_cfs_single <- function(cfs, settle, yield = NULL, conv = "30/360", freq
     yield <- yield / 100
   }
   settle <- try_parse_date(settle)
-  next_coupon <- (cfs %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
-  prev_coupon <- (cfs %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]
+#   next_coupon <- (cfs %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
+#   prev_coupon <- (cfs %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]
+  next_coupon <- with(cfs, cf_date[min(which(cf_date > settle))])
+  prev_coupon <- with(cfs, cf_date[max(which(cf_date <= settle))])
   E <- dc(prev_coupon, next_coupon, conv)
   A <- dc(prev_coupon, settle, conv)
   coupon_offset <- (E - A)
@@ -402,9 +404,11 @@ calc_clean_px.bond <- function(b, settle, yield){
   conv <- b$conv
   cfs <- b$cfs
   
-  prev_coupon <- (cfs$mat %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]  
-  next_coupon <- (cfs$mat %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
-  
+#   prev_coupon <- (cfs$mat %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]  
+#   next_coupon <- (cfs$mat %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
+  next_coupon <- with(cfs$mat, cf_date[min(which(cf_date > settle))])
+  prev_coupon <- with(cfs$mat, cf_date[max(which(cf_date <= settle))])  
+
   dirty_px <- calc_dirty_px.bond(b, settle, yield)
   ai <- acc_int(prev_coupon, settle, next_coupon, coupon, conv)
   clean_px <- dirty_px - ai
@@ -482,8 +486,10 @@ ytm <- function(cf, times, y0 = 0.05,
 #' @export
 yield_cfs_single <- function(cfs, settle, coupon, conv = "30/360", freq = 2, clean_px){
   
-  prev_coupon <- (cfs %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]  
-  next_coupon <- (cfs %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
+#   prev_coupon <- (cfs %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]  
+#   next_coupon <- (cfs %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
+  next_coupon <- with(cfs, cf_date[min(which(cf_date > settle))])
+  prev_coupon <- with(cfs, cf_date[max(which(cf_date <= settle))])
   
   cfs <- discount_cfs_single(cfs, settle, yield = NULL, conv, freq, include_dfPV = FALSE)
   
