@@ -722,3 +722,33 @@ calc_risk.bond <- function(b, settle, price_yield,
   
   round(risk, 8)
 }
+
+#' @rdname calc_risk
+#' @export
+calc_dv01 <- function(x, ...){
+  UseMethod("calc_dv01")
+}
+
+#' @rdname calc_dv01
+#' @export
+calc_dv01.default <- function(maturity, settle, coupon, price_yield, 
+                              input_type = "Y", conv = "30/360", 
+                              freq = 2){
+  risk <- calc_risk(maturity, settle, coupon, price_yield,
+                    input_type, returnCFs = FALSE)
+  dv01 <- risk["dv01"]
+  attr(dv01, "workout_date") <- attr(risk, "workout_date")
+  attr(dv01, "workout_type") <- attr(risk, "workout_type")  
+  dv01
+}
+
+#' @rdname calc_dv01
+#' @export
+calc_dv01.bond <- function(b, settle, price_yield,
+                             input_type = "Y"){
+  risk <- calc_risk(b, settle, price_yield, input_type, returnCFs = FALSE)
+  dv01 <- risk["dv01"]
+  attr(dv01, "workout_date") <- attr(risk, "workout_date")
+  attr(dv01, "workout_type") <- attr(risk, "workout_type")  
+  dv01
+}
