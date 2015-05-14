@@ -2,6 +2,8 @@
 
 #' Create vector of cashflow amounts
 #' 
+#' @family cashflows
+#' 
 #' @param num Number of cashflows
 #' @param coupon  Constant cashflow amount
 #' @param freq  Cashflow frequency (number of periods per year)
@@ -28,6 +30,8 @@ create_cf_amounts <- function(num, coupon, freq, redemption = 100){
 #' in an "id," normally the CUSIP, the integers 1 to N will be used where N is
 #' the number of workout dates. 
 #' 
+#' @family cashflows
+#' 
 #' @param maturity Maturity/Workout date
 #' @param coupon  Annnual coupon amount
 #' @param settle Settlement date
@@ -39,14 +43,12 @@ create_cf_amounts <- function(num, coupon, freq, redemption = 100){
 #' @return  tbl_df with cashflows counting back to the coupon date before settle.
 #'          Columns are (id, cashflow date, cashflow amount)
 #' @examples
-#' create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100, "ABCD")
+#' create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100,"ABCD")
 #' @export
 create_cashflows <- function(maturity, coupon, settle, conv = "30/360", 
                              freq = 2, redemption = 100, id = NULL){
-  maturity <- safe_ifelse(is.Date(maturity), maturity,
-                          as.Date(parse_date_time(maturity, c("ymd","mdy"))))
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
+  maturity <- try_parse_date(maturity)
+  settle <- try_parse_date(settle)
   coupon <- as.numeric(coupon)
   
   daysinyear <- 365.25
@@ -78,9 +80,7 @@ create_cashflows <- function(maturity, coupon, settle, conv = "30/360",
         )
   ) 
   
-  
-  return(cf)
-  
+  cf
   
 }
 
@@ -90,7 +90,7 @@ create_cashflows <- function(maturity, coupon, settle, conv = "30/360",
 #' Create \code{bond} Object
 #' 
 #' Given basic bond details like maturity date, call date and price (if callable),
-#' coupon, frequency, settle, daycount convention, and cusip (or any id),
+#' coupon, frequency, settle, daycount convention, and id (e.g. cusip),
 #' this will create an object of type \code{bond}. The constructor can take a 
 #' \code{cfs} object, which, if passed, should be a list of \code{tbl_df}s, where each
 #' one has a name that means something. e.g. \code{cfs$maturity}, \code{cfs$call},
@@ -106,28 +106,25 @@ create_cashflows <- function(maturity, coupon, settle, conv = "30/360",
 #'  or \code{"Act/365"})
 #' @param freq  Coupon frequency (number of periods per year)
 #' @param redemption  Redemption value or par amount
+#' @param id CUSIP or other id
 #' @param cfs List of cashflow tbl_dfs (id, cf_date, cf_amount)
-#' @param cusip CUSIP or other id
 #' @return  \code{bond} object with cashflows
 #' @examples
-#' bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, "ABCD")
-#' bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, "ABCD",
+#' bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD")
+#' bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD",
 #'      call_date = "2025-02-15", call_px = 101)
 #' @export
 bond <- function(maturity, coupon, dated_date, conv = "30/360", freq = 2, 
-                 redemption = 100, cfs = NULL, cusip = NULL,
+                 redemption = 100, id = NULL, cfs = NULL,
                  call_date = NULL, call_px = NULL){
   if(!(conv %in% c("30/360", "Act/Act", "Act/365")))
     stop("Day count convention not supported.")
-  maturity <- safe_ifelse(is.Date(maturity), maturity,
-                          as.Date(parse_date_time(maturity, c("ymd","mdy"))))
-  dated_date <- safe_ifelse(is.Date(dated_date), dated_date,
-                            as.Date(parse_date_time(dated_date, c("ymd","mdy"))))
+  maturity <- try_parse_date(maturity)
+  dated_date <- try_parse_date(dated_date)
   
   if(!is.null(call_date) && !is.na(call_date))
   {
-    call_date <- safe_ifelse(is.Date(call_date), call_date,
-                             as.Date(parse_date_time(call_date, c("ymd","mdy"))))
+    call_date <- try_parse_date(call_date)
     call_px <- ifelse((is.null(call_px) || is.na(call_px)), 100, call_px)
   } else {    
     call_date <- NULL
@@ -137,11 +134,11 @@ bond <- function(maturity, coupon, dated_date, conv = "30/360", freq = 2,
   
   if(is.null(cfs)){
     cfs_maturity <- create_cashflows(maturity, coupon, dated_date, conv, freq,
-                                     redemption, id = cusip)
+                                     redemption, id)
     if(!is.null(call_date))
     {
       cfs_call <- create_cashflows(call_date, coupon, dated_date, conv, freq, 
-                                   redemption = call_px, id = cusip)    
+                                   redemption = call_px, id)    
     } else{
       cfs_call <- NULL
     }
@@ -155,13 +152,13 @@ bond <- function(maturity, coupon, dated_date, conv = "30/360", freq = 2,
     
   }
   
-  bond <- list(cusip = cusip, maturity = maturity, coupon = coupon, 
+  bond <- list(id = id, maturity = maturity, coupon = coupon, 
                dated_date = dated_date, conv = conv, freq = freq, 
                cfs = cfs, call_date = call_date, 
                call_px = call_px)
   
   class(bond) <- "bond"
-  return(bond)
+  bond
 }
 
 # Pricing Functions --------------------------------------------------------
@@ -174,25 +171,24 @@ bond <- function(maturity, coupon, dated_date, conv = "30/360", freq = 2,
 #' dates passed in confrom to the convention that \code{settle} is between
 #' \code{accrual_start} and \code{next_coupon}.
 #' 
+#' @family pricing functions
+#' 
 #' @param accrual_start Accrual start date
-#' @param settle  Settlement Date (R Date type or )
+#' @param settle  Settlement Date
 #' @param next_coupon  Next coupon date
 #' @param coupon Annual coupon amount
 #' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
 #'  or \code{"Act/365"})
 #' @param freq  Coupon frequency (number of periods per year)
-#' @return Accrued Interest for a par amount of 100
+#' @return Numeric value of the accrued interest for a par amount of 100
 #' @examples
 #' acc_int("2015-01-15", "2015-03-07", "2015-07-15", "30/360", 2)
 #' @export
 acc_int <- function(accrual_start, settle, next_coupon, coupon,
                     conv = "30/360", freq = 2){    
-  accrual_start <- safe_ifelse(is.Date(accrual_start), accrual_start,
-                        as.Date(parse_date_time(accrual_start, c("ymd","mdy"))))
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
-  next_coupon <- safe_ifelse(is.Date(next_coupon), next_coupon,
-                        as.Date(parse_date_time(next_coupon, c("ymd","mdy"))))
+  accrual_start <- try_parse_date(accrual_start)
+  settle <- try_parse_date(settle)
+  next_coupon <- try_parse_date(next_coupon)
   
   daysinyear <- days_in_year(settle, conv)
   
@@ -200,24 +196,46 @@ acc_int <- function(accrual_start, settle, next_coupon, coupon,
     daysinyear <- freq * dc_act_act(accrual_start, next_coupon)
   }
   
-  ai_days <- dc(accrual_start, settle, conv)
-  
+  ai_days <- dc(accrual_start, settle, conv)  
   ai <- (ai_days / daysinyear) * (coupon)
-  
-  return(ai)
+  ai
 }
 
-
+#' Discount Single Set of Cashflows
+#' 
+#' Used as the backbone for a number of pricing functions. The function filters
+#' for relevant cashflow dates given the settle date. It allows the user to 
+#' specify which columns should be in the results via the last two parameters.
+#' 
+#' @family pricing functions
+#' 
+#' @param cfs Cashflows \code{tbl_df}
+#' @param settle  Settlement Date
+#' @param yield  Yield in percent (e.g. 5.0)
+#' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+#'  or \code{"Act/365"})
+#' @param freq  Coupon frequency (number of periods per year)
+#' @param include_dfPV Boolean indicating whether or not to include 
+#' discount factor and present value columns in the result
+#' @param include_dur Boolean indicating whether or not to include macaulay 
+#' duration, modified duration, dv01, and convexity columns in result
+#' @return \code{tbl_df} containing cashflows and other calculated columns
+#' given the \code{yield} parameter.
+#' @examples
+#' cfs <- create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100, "ABCD")
+#' discount_cfs_single(cfs, "2015-05-07", 4, "30/360", 2, TRUE, TRUE)
+#' @export
 discount_cfs_single <- function(cfs, settle, yield = NULL, conv = "30/360", freq = 2, 
                                 include_dfPV = TRUE, include_dur = FALSE){
   
   if(!is.null(yield)){
     yield <- yield / 100
   }
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
-  next_coupon <- (cfs %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
-  prev_coupon <- (cfs %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]
+  settle <- try_parse_date(settle)
+#   next_coupon <- (cfs %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
+#   prev_coupon <- (cfs %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]
+  next_coupon <- with(cfs, cf_date[min(which(cf_date > settle))])
+  prev_coupon <- with(cfs, cf_date[max(which(cf_date <= settle))])
   E <- dc(prev_coupon, next_coupon, conv)
   A <- dc(prev_coupon, settle, conv)
   coupon_offset <- (E - A)
@@ -229,7 +247,7 @@ discount_cfs_single <- function(cfs, settle, yield = NULL, conv = "30/360", freq
   {
     if(conv == "Act/Act"){
       cfs <- cfs %>% mutate(index = (dense_rank(cf_date) - 1),
-                            days_diff = dc_vec(settle, cf_date, conv),
+                            days_diff = dc(settle, cf_date, conv),
                             year_frac = (index + (DSC / E))/freq,
                             df = 1 / (1 + yield / freq)^(freq *year_frac),
                             PV = cf_amount * df)
@@ -256,7 +274,7 @@ discount_cfs_single <- function(cfs, settle, yield = NULL, conv = "30/360", freq
   else{
     if(conv == "Act/Act"){
       cfs <- cfs %>% mutate(index = (dense_rank(cf_date) - 1),
-                            days_diff = dc_vec(settle, cf_date, conv),
+                            days_diff = dc(settle, cf_date, conv),
                             year_frac = (index + (DSC / E))/freq)
     }
     else{
@@ -265,29 +283,54 @@ discount_cfs_single <- function(cfs, settle, yield = NULL, conv = "30/360", freq
                             year_frac = days_diff / daysinyear)
     }
   }
-  return(cfs)
+  cfs
 }
 
 
+#' Calculate Dirty Price of a Bond
+#' 
+#' Given a \code{bond} or the necessary parameters to construct one, this
+#' will calculate the price of the \code{bond} including accrued interest. This
+#' price is used in yield calculations and other functions that require the 
+#' "full" or "dirty" price.
+#' 
+#' @family pricing functions
+#' 
+#' @param b A \code{bond} object
+#' @param maturity Maturity/Workout date
+#' @param settle Settlement Date
+#' @param coupon  Annnual coupon amount
+#' @param yield Yield in percent (e.g. 5.0)
+#' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+#'  or \code{"Act/365"})
+#' @param freq  Coupon frequency (number of periods per year)
+#' @return Numeric value of the clean price and corresponding worst workout date
+#' if there are multiple sets of cashflows in the bond
+#' @examples
+#' calc_dirty_px("2045-02-15", "2015-02-15", 4, 3, "Act/Act", 2)
+#' b <- bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD")
+#' calc_dirty_px(b, "2015-05-15", 3)
+#' @export
 calc_dirty_px <- function(x, ...){
   UseMethod("calc_dirty_px")
 }
 
-
+#' @rdname calc_dirty_px
+#' @export
 calc_dirty_px.default <- function(maturity, settle, coupon, yield,
                                   conv = "30/360", freq = 2){
   if(!(conv %in% c("30/360", "Act/Act", "Act/365")))
     stop("Day count convention not supported.")
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
-  tmp_dated_date <- settle - months(6)
+  settle <- try_parse_date(settle)
+  tmp_dated_date <- settle - months(12 / freq)
   b <- bond(maturity, coupon, tmp_dated_date, conv, freq)
   dirty_px <- calc_dirty_px.bond(b, settle, yield)
-  return(dirty_px)
+  dirty_px
   
 }
 
-
+#' @rdname calc_dirty_px
+#' @export
 calc_dirty_px.bond <- function(b, settle, yield){
   
   conv <- b$conv
@@ -312,38 +355,60 @@ calc_dirty_px.bond <- function(b, settle, yield){
     
   }
   
-  return(dirty_px)
+  dirty_px
 }
 
+
+#' Calculate Clean Price of a Bond
+#' 
+#' Given a \code{bond} or the necessary parameters to construct one, this
+#' will calculate the price of the \code{bond} excluding accrued interest.
+#' This is the price used in normal market quotes.
+#' 
+#' @family pricing functions
+#' 
+#' @inheritParams calc_dirty_px
+#' 
+#' @return Numeric value of the clean price and corresponding worst workout date
+#' if there are multiple sets of cashflows in the bond
+#' @examples
+#' calc_clean_px("2045-02-15", "2015-02-15", 4, 3, "Act/Act", 2)
+#' b <- bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD")
+#' calc_clean_px(b, "2015-05-15", 3)
+#' @export
 calc_clean_px <- function(x, ...){
   UseMethod("calc_clean_px")
 }
 
+#' @rdname calc_clean_px
+#' @export
 calc_clean_px.default <- function(maturity, settle, coupon, yield,
                                   conv = "30/360", freq = 2){
   if(!(conv %in% c("30/360", "Act/Act", "Act/365")))
     stop("Day count convention not supported.")
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
-  tmp_dated_date <- settle - months(6)
+  settle <- try_parse_date(settle)
+  tmp_dated_date <- settle - months(12 / freq)
   b <- bond(maturity, coupon, tmp_dated_date, conv, freq)
   
   clean_px <- calc_clean_px.bond(b, settle, yield)
-  return(clean_px)  
+  clean_px
 }
 
+#' @rdname calc_clean_px
+#' @export
 calc_clean_px.bond <- function(b, settle, yield){
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
+  settle <- try_parse_date(settle)
   
   coupon <- b$coupon
   freq <- b$freq
   conv <- b$conv
   cfs <- b$cfs
   
-  prev_coupon <- (cfs$mat %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]  
-  next_coupon <- (cfs$mat %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
-  
+#   prev_coupon <- (cfs$mat %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]  
+#   next_coupon <- (cfs$mat %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
+  next_coupon <- with(cfs$mat, cf_date[min(which(cf_date > settle))])
+  prev_coupon <- with(cfs$mat, cf_date[max(which(cf_date <= settle))])  
+
   dirty_px <- calc_dirty_px.bond(b, settle, yield)
   ai <- acc_int(prev_coupon, settle, next_coupon, coupon, conv)
   clean_px <- dirty_px - ai
@@ -352,12 +417,35 @@ calc_clean_px.bond <- function(b, settle, yield){
   names(clean_px) <- names(dirty_px)
   attr(clean_px, "workout_date") <- max(cfs[[names(clean_px)]]$cf_date)
   
-  return(clean_px)
+  clean_px
   
 }
 
+#' Yield or IRR for a Single Set of Cashflows with the Outflow
+#' 
+#' Used in \code{yield_cfs_single} to do the actual yield calc. 
+#' The \code{ytm} function from the NMOF manual is used to calculate
+#' the yield, with a 5\% initial guess. It assumes that the first
+#' cashflow in the \code{cf} vector is negative as it is an outflow equal
+#' to the present value of the cashflows. The corresponding element
+#' in the \code{times} vector should be 0.
+#' 
+#' @family pricing functions
+#' 
+#' @param cf Vector of cashflow amounts (first cashflow is an outflow)
+#' @param times Vector of yearfracs (times to cashflow, first should be 0)
+#' @param y0 Initial yield guess (5\% default)
+#' @param tol Tolerance in the yield calculation
+#' @param maxit Maximum number of iterations
+#' @return Numeric value of the yield/IRR for the given cashflow
+#' amounts and yearfracs in decimal form (not percentage) (e.g. .05)
+#' @examples
+#' cf <- c(-101, 3, 3, 3, 103)
+#' times <- c(0, 1, 2, 3, 4)
+#' ytm(cf, times)
+#' @export
 ytm <- function(cf, times, y0 = 0.05,
-                tol = 1e-05, h = 1e-05, maxit = 1000L) {        
+                tol = 1e-05, maxit = 1000L) {        
   dr <- 1
   for (i in seq_len(maxit)) {
     y1 <- 1 + y0
@@ -374,10 +462,34 @@ ytm <- function(cf, times, y0 = 0.05,
   y0
 }
 
+
+#' Yield or IRR for a Single Set of Cashflows
+#' 
+#' Used as the backbone for all yield calculations. This function uses
+#' \code{discount_cfs_single} to generate the cashflows' yearfracs
+#' from the settlement date. The \code{ytm} function from the NMOF manual is
+#' used to calculate the yield, with a 5\% initial guess.
+#' 
+#' @family pricing functions
+#' 
+#' @param cfs Cashflows \code{tbl_df}
+#' @param settle  Settlement Date
+#' @param coupon  Annnual coupon amount
+#' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+#'  or \code{"Act/365"})
+#' @param freq  Coupon frequency (number of periods per year)
+#' @param clean_px The clean price of the bond
+#' @return Numeric value of the yield/IRR for the given cashflows and price
+#' @examples
+#' cfs <- create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100, "ABCD")
+#' yield_cfs_single(cfs, "2015-05-07", 4, "30/360", 2, 101)
+#' @export
 yield_cfs_single <- function(cfs, settle, coupon, conv = "30/360", freq = 2, clean_px){
   
-  prev_coupon <- (cfs %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]  
-  next_coupon <- (cfs %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
+#   prev_coupon <- (cfs %>%  filter(cf_date <= settle) %>% summarise(max(cf_date)))[[1]]  
+#   next_coupon <- (cfs %>%  filter(cf_date > settle) %>% summarise(min(cf_date)))[[1]]
+  next_coupon <- with(cfs, cf_date[min(which(cf_date > settle))])
+  prev_coupon <- with(cfs, cf_date[max(which(cf_date <= settle))])
   
   cfs <- discount_cfs_single(cfs, settle, yield = NULL, conv, freq, include_dfPV = FALSE)
   
@@ -386,34 +498,61 @@ yield_cfs_single <- function(cfs, settle, coupon, conv = "30/360", freq = 2, cle
   
   amt <- c(-dirty_px , cfs$cf_amount)
   tm <- c(0, cfs$year_frac)
-  yield <- ytm(amt, tm, y0 = 0.05, tol = 1e-06, h = 1e-05, maxit = 1000L)
+  yield <- ytm(amt, tm, y0 = 0.05, tol = 1e-06, maxit = 1000L)
   yield <- 100 * freq * ((1 + yield)^(1 / freq) - 1)
   
-  return(yield)
+  yield
 }
 
-
-
+#' Calculate Yield to Worst of a Bond
+#' 
+#' Given a \code{bond} or the necessary parameters to construct one, this
+#' will calculate the yield to worst of the \code{bond}. The workout dates
+#' used are the based on the \code{cfs} object's last cashflow dates in
+#' the \code{bond}. This function uses \code{yield_cfs_single}, which in 
+#' turn uses the imported function \code{NMOF::ytm} to do the actual
+#' calculations.
+#' 
+#' 
+#' @family pricing functions
+#' 
+#' @param b A \code{bond} object
+#' @param maturity Maturity/Workout date
+#' @param settle Settlement Date
+#' @param coupon  Annnual coupon amount
+#' @param clean_px The clean price of the bond
+#' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+#'  or \code{"Act/365"})
+#' @param freq  Coupon frequency (number of periods per year)
+#' @return Numeric value of the yield to worst and corresponding worst workout date
+#' if there are multiple sets of cashflows in the bond
+#' @examples
+#' calc_yield("2045-02-15", "2015-02-15", 4, 101, "Act/Act", 2)
+#' b <- bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD")
+#' calc_yield(b, "2015-05-15", 101)
+#' @export
 calc_yield  <- function(x, ...){
   UseMethod("calc_yield")
 }
 
+#' @rdname calc_yield
+#' @export
 calc_yield.default <- function(maturity, settle, coupon, clean_px,
                                conv = "30/360", freq = 2){
   if(!(conv %in% c("30/360", "Act/Act", "Act/365")))
     stop("Day count convention not supported.")
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
-  tmp_dated_date <- settle - months(6)
+  settle <- try_parse_date(settle)
+  tmp_dated_date <- settle - months(12 / freq)
   b <- bond(maturity, coupon, tmp_dated_date, conv, freq)
   
   yield <- calc_yield.bond(b, settle, clean_px)
-  return(yield)  
+  yield
 }
 
+#' @rdname calc_yield
+#' @export
 calc_yield.bond <- function(b, settle, clean_px){
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
+  settle <- try_parse_date(settle)
   
   coupon <- b$coupon
   freq <- b$freq
@@ -438,9 +577,32 @@ calc_yield.bond <- function(b, settle, clean_px){
     attr(ytw, "workout_date") <- max(cfs[[worst_index]]$cf_date)    
   }
   
-  return(ytw)  
+  ytw 
 }
 
+
+#' DV01 for a Single Set of Cashflows
+#' 
+#' Used as the backbone for all DV01 calculations. This function uses
+#' \code{discount_cfs_single} to calculate the important risk metrics.
+#' 
+#' 
+#' 
+#' @family pricing functions
+#' 
+#' @param cfs Cashflows \code{tbl_df}
+#' @param settle  Settlement Date
+#' @param yield Yield or IRR used to discount the cashflows
+#' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+#'  or \code{"Act/365"})
+#' @param freq  Coupon frequency (number of periods per year)
+#' @param returnCFs Boolean flag indicating whether or not to return the
+#' calculated set of cashflows and risk metrics
+#' @return Numeric value of the DV01 for the given cashflows and yield
+#' @examples
+#' cfs <- create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100, "ABCD")
+#' dv01_cfs_single(cfs, "2015-05-07", 4, "30/360", 2, TRUE)
+#' @export
 dv01_cfs_single <- function(cfs, settle, yield, conv = "30/360",
                             freq = 2, returnCFs = TRUE){
   cfs <- discount_cfs_single(cfs, settle, yield, conv, freq,
@@ -453,23 +615,54 @@ dv01_cfs_single <- function(cfs, settle, yield, conv = "30/360",
     result <- sum(cfs$dv01)
     
   }
-  return(result)
+  result
   
 }
 
-
+#' Calculate the DV01 of a Bond
+#' 
+#' Given a \code{bond} or the necessary parameters to construct one, this
+#' will calculate the DV01 of the \code{bond} for the worst workout date. 
+#' The workout dates used are the based on the \code{cfs} object's last 
+#' cashflow dates in the \code{bond}. This function uses 
+#' \code{discount_cfs_single} to do the actual calculations.
+#' 
+#' 
+#' @family pricing functions
+#' 
+#' @param b A \code{bond} object
+#' @param maturity Maturity/Workout date
+#' @param settle Settlement Date
+#' @param coupon  Annnual coupon amount
+#' @param price_yield The clean price of the bond or the yield to worst
+#' @param input_type \code{"Y"} for Yield to Worst (default) or \code{"P"}
+#' for clean price
+#' @param returnCFs Boolean flag indicating whether or not to return the
+#' calculated set of cashflows and risk metrics
+#' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
+#'  or \code{"Act/365"})
+#' @param freq  Coupon frequency (number of periods per year)
+#' @return Numeric value of the DV01 and corresponding worst workout date
+#' if there are multiple sets of cashflows in the bond or a full set of 
+#' calculated cashflows and risk metrics as a \code{tbl_df}
+#' @examples
+#' calc_dv01("2045-02-15", "2015-02-15", 4, 101, "P", TRUE, "Act/Act", 2)
+#' b <- bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD")
+#' calc_dv01(b, "2015-05-15", 101, "P", TRUE)
+#' @export
 calc_dv01  <- function(x, ...){
   UseMethod("calc_dv01")
 }
 
+#' @rdname calc_dv01
+#' @export
 calc_dv01.default <- function(maturity, settle, coupon, price_yield, 
                               input_type = "Y", returnCFs = FALSE,
                               conv = "30/360", freq = 2){
   if(!(conv %in% c("30/360", "Act/Act", "Act/365")))
     stop("Day count convention not supported.")
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
-  tmp_dated_date <- settle - months(6)
+  settle <- try_parse_date(settle)
+  tmp_dated_date <- settle - months(12 / freq)
   b <- bond(maturity, coupon, tmp_dated_date, conv, freq)
   
   if(input_type == "P"){
@@ -478,13 +671,14 @@ calc_dv01.default <- function(maturity, settle, coupon, price_yield,
   else{yield <- price_yield}
   
   dv01 <- calc_dv01.bond(b, settle, yield, returnCFs = returnCFs)
-  return(dv01)  
+  dv01
 }
 
+#' @rdname calc_dv01
+#' @export
 calc_dv01.bond <- function(b, settle, price_yield,
                            input_type = "Y", returnCFs = FALSE){
-  settle <- safe_ifelse(is.Date(settle), settle,
-                        as.Date(parse_date_time(settle, c("ymd","mdy"))))
+  settle <- try_parse_date(settle)
   
   if(input_type == "P"){
     yield <- calc_yield(b, settle, price_yield)
@@ -519,7 +713,7 @@ calc_dv01.bond <- function(b, settle, price_yield,
     }
   }
   
-  return(dv01)  
+  dv01
 }
 
 

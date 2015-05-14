@@ -13,5 +13,4 @@
 #' @importFrom plyr round_any
 #' @importFrom NMOF DEopt
 #' @importFrom zoo as.Date
-
 NULL
