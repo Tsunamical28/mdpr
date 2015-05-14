@@ -40,7 +40,10 @@ coalesce <- function(...){
 safe_ifelse <- function(cond, yes, no, class_to_use = class(no)){
   structure(ifelse(cond, yes, no), class = class_to_use)
 }
-
+# safe_ifelse <- function(cond, yes, no){  
+#   if(cond) yes 
+#   else no
+# }
 
 #' Vectorized function for rounding to multiple of any number
 #' 
