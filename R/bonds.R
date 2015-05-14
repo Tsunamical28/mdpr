@@ -53,7 +53,7 @@ create_cashflows <- function(maturity, coupon, settle, conv = "30/360",
   
   daysinyear <- 365.25
   maturity_in_years <- as.numeric(maturity - settle) / daysinyear
-  coup_num <- round_any_vec(maturity_in_years, 1 / freq, ceiling) * freq
+  coup_num <- round_any_v(maturity_in_years, 1 / freq, ceiling) * freq
   coupon_dates <- mapply(seq, from = maturity,
                          by = paste0("-", as.integer(12 / freq)," months"), 
                          length.out = (coup_num + 1), SIMPLIFY = F)
