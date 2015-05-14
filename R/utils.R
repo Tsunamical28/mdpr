@@ -19,20 +19,20 @@ coalesce <- function(...){
 }
 
 
-#' Vectorized \code{ifelse} with Class Retention
+#' Vectorized \code{ifelse} with Class Coercion
 #' 
 #' The normal behavior for the \code{ifelse} function is to return the resulting vector
 #' with a class type coerced to be the same as the \code{yes} argument. However, when 
 #' a Date type vector is passed as an argument, Dates lose their class when the 
 #' condition is evaluated. The resulting vector is of type numeric. 
-#' This function \code{safe_ifelse} restores the normal behavior for Date vectors.
+#' This function \code{safe_ifelse} modifies the normal behavior for Date vectors.
 #' Users can specify whether to coerce to any class or the default will be used
 #' which is \code{class(no)}.
 #' 
 #' @param cond the test to determine if yes/no
 #' @param yes the value or operation to return if \code{cond} evaluates to \code{TRUE}
 #' @param no the value or operation to return if \code{cond} evaluates to \code{FALSE} 
-#' @return the resulting vector with retention of the \code{yes} argument class type
+#' @return the resulting vector coerced to class type \code{class_to_use}
 #' @examples
 #' d = as.Date(c('2015-01-01','2015-08-08'))
 #' safe_ifelse(d=='2015-01-01',d-10,d)
