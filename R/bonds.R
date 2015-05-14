@@ -581,9 +581,9 @@ calc_yield.bond <- function(b, settle, clean_px){
 }
 
 
-#' DV01 for a Single Set of Cashflows
+#' DV01 and Other Risks for a Single Set of Cashflows
 #' 
-#' Used as the backbone for all DV01 calculations. This function uses
+#' Used as the backbone for all DV01 and risk calculations. This function uses
 #' \code{discount_cfs_single} to calculate the important risk metrics.
 #' 
 #' 
@@ -598,7 +598,8 @@ calc_yield.bond <- function(b, settle, clean_px){
 #' @param freq  Coupon frequency (number of periods per year)
 #' @param returnCFs Boolean flag indicating whether or not to return the
 #' calculated set of cashflows and risk metrics
-#' @return Numeric value of the DV01 for the given cashflows and yield
+#' @return Numeric value of the DV01 and other risks for the given cashflows 
+#' and yield or the full calculated set of risks by cashflow
 #' @examples
 #' cfs <- create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100, "ABCD")
 #' dv01_cfs_single(cfs, "2015-05-07", 4, "30/360", 2, TRUE)
@@ -612,19 +613,19 @@ dv01_cfs_single <- function(cfs, settle, yield, conv = "30/360",
   }
   else
   {
-    result <- sum(cfs$dv01)
+    result <- colSums(cfs[-1:-7])
     
   }
   result
   
 }
 
-#' Calculate the DV01 of a Bond
+#' Calculate the DV01 and other Risks of a Bond
 #' 
 #' Given a \code{bond} or the necessary parameters to construct one, this
-#' will calculate the DV01 of the \code{bond} for the worst workout date. 
-#' The workout dates used are the based on the \code{cfs} object's last 
-#' cashflow dates in the \code{bond}. This function uses 
+#' will calculate the DV01 and other risks of the \code{bond} for the worst
+#' workout date. The workout dates used are the based on the \code{cfs} 
+#' object's last cashflow dates in the \code{bond}. This function uses 
 #' \code{discount_cfs_single} to do the actual calculations.
 #' 
 #' 
@@ -642,9 +643,10 @@ dv01_cfs_single <- function(cfs, settle, yield, conv = "30/360",
 #' @param conv Daycount convention (one of \code{"30/360"}, \code{"Act/Act"},
 #'  or \code{"Act/365"})
 #' @param freq  Coupon frequency (number of periods per year)
-#' @return Numeric value of the DV01 and corresponding worst workout date
-#' if there are multiple sets of cashflows in the bond or a full set of 
-#' calculated cashflows and risk metrics as a \code{tbl_df}
+#' @return Numeric value of the DV01 and other risks and corresponding worst 
+#' workout date and workout type if there are multiple sets of cashflows
+#' in the bond or a full set of calculated cashflows and risk metrics 
+#' as a \code{tbl_df}
 #' @examples
 #' calc_dv01("2045-02-15", "2015-02-15", 4, 101, "P", TRUE, "Act/Act", 2)
 #' b <- bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD")
@@ -689,14 +691,17 @@ calc_dv01.bond <- function(b, settle, price_yield,
   conv <- b$conv
   cfs <- b$cfs
   
-  if(length(cfs)==1)
+  if(length(cfs) == 1)
   {    
     cfs <- cfs$maturity
-    dv01 <- dv01_cfs_single(cfs, settle, yield, conv, freq, returnCFs)
+    dv01 <- dv01_cfs_single(cfs, settle, yield, conv, freq, TRUE)
+    
     if(!returnCFs)
     {
-      names(dv01) <- "maturity"
-      attr(dv01, "workout_date") <- max(cfs$cf_date)
+      workout_date <- max(cfs$cf_date)
+      dv01 <- colSums(dv01[-1:-7])
+      attr(dv01, "workout_type") <- "maturity"
+      attr(dv01, "workout_date") <- workout_date
     }
   }
   else
@@ -706,14 +711,16 @@ calc_dv01.bond <- function(b, settle, price_yield,
     worst_index <- which.min(dirty_px)
     worst_type <- names(dirty_px)[worst_index]
     dv01 <- dv01[[worst_index]]
+    workout_date <- max(cfs[[worst_index]]$cf_date)   
+    
     if(!returnCFs){
-      dv01 <- sum(dv01$dv01)
-      names(dv01) <- worst_type
-      attr(dv01, "workout_date") <- max(cfs[[worst_index]]$cf_date)   
+      dv01 <- colSums(dv01[-1:-7])
     }
+    attr(dv01, "workout_type") <- "maturity"
+    attr(dv01, "workout_date") <- max(cfs[[worst_index]]$cf_date)   
   }
   
-  dv01
+  round(dv01, 8)
 }
 
 

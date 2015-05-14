@@ -2,7 +2,7 @@
 % Please edit documentation in R/bonds.R
 \name{dv01_cfs_single}
 \alias{dv01_cfs_single}
-\title{DV01 for a Single Set of Cashflows}
+\title{DV01 and Other Risks for a Single Set of Cashflows}
 \usage{
 dv01_cfs_single(cfs, settle, yield, conv = "30/360", freq = 2,
   returnCFs = TRUE)
@@ -23,10 +23,11 @@ or \code{"Act/365"})}
 calculated set of cashflows and risk metrics}
 }
 \value{
-Numeric value of the DV01 for the given cashflows and yield
+Numeric value of the DV01 and other risks for the given cashflows
+and yield or the full calculated set of risks by cashflow
 }
 \description{
-Used as the backbone for all DV01 calculations. This function uses
+Used as the backbone for all DV01 and risk calculations. This function uses
 \code{discount_cfs_single} to calculate the important risk metrics.
 }
 \examples{

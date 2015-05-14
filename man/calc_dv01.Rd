@@ -4,7 +4,7 @@
 \alias{calc_dv01}
 \alias{calc_dv01.bond}
 \alias{calc_dv01.default}
-\title{Calculate the DV01 of a Bond}
+\title{Calculate the DV01 and other Risks of a Bond}
 \usage{
 calc_dv01(x, ...)
 
@@ -37,15 +37,16 @@ or \code{"Act/365"})}
 \item{b}{A \code{bond} object}
 }
 \value{
-Numeric value of the DV01 and corresponding worst workout date
-if there are multiple sets of cashflows in the bond or a full set of
-calculated cashflows and risk metrics as a \code{tbl_df}
+Numeric value of the DV01 and other risks and corresponding worst
+workout date and workout type if there are multiple sets of cashflows
+in the bond or a full set of calculated cashflows and risk metrics
+as a \code{tbl_df}
 }
 \description{
 Given a \code{bond} or the necessary parameters to construct one, this
-will calculate the DV01 of the \code{bond} for the worst workout date.
-The workout dates used are the based on the \code{cfs} object's last
-cashflow dates in the \code{bond}. This function uses
+will calculate the DV01 and other risks of the \code{bond} for the worst
+workout date. The workout dates used are the based on the \code{cfs}
+object's last cashflow dates in the \code{bond}. This function uses
 \code{discount_cfs_single} to do the actual calculations.
 }
 \examples{
