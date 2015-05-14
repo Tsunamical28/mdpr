@@ -24,7 +24,6 @@ days_in_year <- function(date, conv = "Act/Act"){
 }
 
 
-#' @rdname dc
 dc_act_act <- function(date1, date2){
   date1 <- try_parse_date(date1)
   date2 <- try_parse_date(date2)
@@ -32,7 +31,7 @@ dc_act_act <- function(date1, date2){
   return(as.numeric(date2 - date1))
 }
 
-#' @rdname dc
+
 dc_30_360 <- function(date1, date2, eom = FALSE){
   date1 <- try_parse_date(date1)
   date2 <- try_parse_date(date2)
@@ -87,7 +86,6 @@ dc_30_360 <- function(date1, date2, eom = FALSE){
   dc
 }
 
-
 #' Day Count
 #' 
 #' Counts the number of days between \code{date1} and \code{date2} via the provided day 
@@ -111,6 +109,7 @@ dc_30_360 <- function(date1, date2, eom = FALSE){
 #' dc(d1, d2, conv = "30/360")
 #' dc(d1, d2, conv = "30/360", eom = TRUE)
 #' 
+#' @aliases dc_act_act dc_30_360
 #' @export
 dc <- function(date1, date2, conv = "30/360", eom = FALSE){
   if(!(conv %in% c("30/360", "Act/Act", "Act/365")))
@@ -120,6 +119,7 @@ dc <- function(date1, date2, conv = "30/360", eom = FALSE){
          "Act/Act" = mapply(dc_act_act, date1, date2, USE.NAMES = FALSE),
          "Act/365" = mapply(dc_act_act, date1, date2, USE.NAMES = FALSE))  
 }
+
 
 
 #' Duration Between Two Dates in Fractional Year Terms

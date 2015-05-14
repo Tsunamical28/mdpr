@@ -36,6 +36,9 @@ in an "id," normally the CUSIP, the integers 1 to N will be used where N is
 the number of workout dates.
 }
 \examples{
-create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100, "ABCD")
+create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100,"ABCD")
+}
+\seealso{
+Other cashflows: \code{\link{create_cf_amounts}}
 }
 

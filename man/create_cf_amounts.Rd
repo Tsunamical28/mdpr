@@ -25,4 +25,7 @@ Create vector of cashflow amounts
 \examples{
 create_cf_amounts(20, 5, 2, 100)
 }
+\seealso{
+Other cashflows: \code{\link{create_cashflows}}
+}
 

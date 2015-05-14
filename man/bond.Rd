@@ -5,7 +5,7 @@
 \title{Create \code{bond} Object}
 \usage{
 bond(maturity, coupon, dated_date, conv = "30/360", freq = 2,
-  redemption = 100, cfs = NULL, cusip = NULL, call_date = NULL,
+  redemption = 100, id = NULL, cfs = NULL, call_date = NULL,
   call_px = NULL)
 }
 \arguments{
@@ -23,16 +23,16 @@ or \code{"Act/365"})}
 
 \item{redemption}{Redemption value or par amount}
 
-\item{cfs}{List of cashflow tbl_dfs (id, cf_date, cf_amount)}
+\item{id}{CUSIP or other id}
 
-\item{cusip}{CUSIP or other id}
+\item{cfs}{List of cashflow tbl_dfs (id, cf_date, cf_amount)}
 }
 \value{
 \code{bond} object with cashflows
 }
 \description{
 Given basic bond details like maturity date, call date and price (if callable),
-coupon, frequency, settle, daycount convention, and cusip (or any id),
+coupon, frequency, settle, daycount convention, and id (e.g. cusip),
 this will create an object of type \code{bond}. The constructor can take a
 \code{cfs} object, which, if passed, should be a list of \code{tbl_df}s, where each
 one has a name that means something. e.g. \code{cfs$maturity}, \code{cfs$call},
@@ -41,8 +41,8 @@ to calculate prices, yields, risk metrics, and do any other kind of fixed
 income analysis.
 }
 \examples{
-bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, "ABCD")
-bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, "ABCD",
+bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD")
+bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD",
      call_date = "2025-02-15", call_px = 101)
 }
 
