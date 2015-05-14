@@ -34,15 +34,15 @@ coalesce <- function(...){
 #' @param no the value or operation to return if \code{cond} evaluates to \code{FALSE} 
 #' @return the resulting vector coerced to class type \code{class_to_use}
 #' @examples
-#' d = as.Date(c('2015-01-01','2015-08-08'))
-#' safe_ifelse(d=='2015-01-01',d-10,d)
+#' d = as.Date(c("2015-01-01","2015-08-08"))
+#' safe_ifelse(d=="2015-01-01",d-10,d)
 #' @export
 safe_ifelse <- function(cond, yes, no, class_to_use = class(no)){
   structure(ifelse(cond, yes, no), class = class_to_use)
 }
 
 
-#' Vectorized function for rounding to multiple of any number
+#' Vectorized Function for Rounding to a Multiple of any Number
 #' 
 #' Vectorized version of \code{plyr::round_any}, which is a function that rounds 
 #' to multiple of any number. 
@@ -51,6 +51,34 @@ safe_ifelse <- function(cond, yes, no, class_to_use = class(no)){
 #' @param accuracy vector of multiples to round the vector \code{x}
 #' @return vector with \code{x} rounded to the nearest \code{accuracy}
 #' @examples
-#' round_any_vec(c(52,199,14),10)
+#' round_any_v(c(52,199,14),10)
 #' @export
-round_any_vec <- Vectorize(round_any, c("x","accuracy"))
+round_any_v <- Vectorize(round_any, c("x","accuracy"))
+
+
+#' Parse Date If Necessary
+#' 
+#' Since atomic objects can only have one type, it is unnecessary to check the type of
+#' each element in the vector. This function checks the type on the vector level to 
+#' determine whether it needs to operate \code{parse_date_time} for \code{d} on a 
+#' vectorized basis.
+#' 
+#' @param d vector of elements that may or may not be type Date
+#' @return Date type vector with NA for a particular element in \code{d} if it were 
+#' not parsable
+#' @examples
+#' try_parse_date(as.Date(c("2015-01-01","2015-08-08")))
+#' try_parse_date(c("2015-01-01","blah"))
+#' @export
+try_parse_date <- function (d) {
+  #Test on the vector level if the type is Date
+  if(!is.Date(d)){
+    d <- as.Date(parse_date_time(d, c("ymd","mdy")))
+  }
+  else
+  {
+    d
+  }
+  d
+}
+
