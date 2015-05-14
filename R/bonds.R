@@ -651,6 +651,7 @@ risk_cfs_single <- function(cfs, settle, yield, conv = "30/360",
 #' calc_risk("2045-02-15", "2015-02-15", 4, 101, "P", TRUE, "Act/Act", 2)
 #' b <- bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD")
 #' calc_risk(b, "2015-05-15", 101, "P", TRUE)
+#' calc_dv01(b, "2015-05-15", 3, "Y")
 #' @export
 calc_risk  <- function(x, ...){
   UseMethod("calc_risk")
