@@ -602,9 +602,9 @@ calc_yield.bond <- function(b, settle, clean_px){
 #' and yield or the full calculated set of risks by cashflow
 #' @examples
 #' cfs <- create_cashflows("2045-02-15", 2.5, "2015-05-07", "Act/Act", 2, 100, "ABCD")
-#' dv01_cfs_single(cfs, "2015-05-07", 4, "30/360", 2, TRUE)
+#' risk_cfs_single(cfs, "2015-05-07", 4, "30/360", 2, TRUE)
 #' @export
-dv01_cfs_single <- function(cfs, settle, yield, conv = "30/360",
+risk_cfs_single <- function(cfs, settle, yield, conv = "30/360",
                             freq = 2, returnCFs = TRUE){
   cfs <- discount_cfs_single(cfs, settle, yield, conv, freq,
                              include_dfPV = TRUE, include_dur = TRUE)
@@ -620,7 +620,7 @@ dv01_cfs_single <- function(cfs, settle, yield, conv = "30/360",
   
 }
 
-#' Calculate the DV01 and other Risks of a Bond
+#' Calculate the Risks of a Bond
 #' 
 #' Given a \code{bond} or the necessary parameters to construct one, this
 #' will calculate the DV01 and other risks of the \code{bond} for the worst
@@ -648,17 +648,17 @@ dv01_cfs_single <- function(cfs, settle, yield, conv = "30/360",
 #' in the bond or a full set of calculated cashflows and risk metrics 
 #' as a \code{tbl_df}
 #' @examples
-#' calc_dv01("2045-02-15", "2015-02-15", 4, 101, "P", TRUE, "Act/Act", 2)
+#' calc_risk("2045-02-15", "2015-02-15", 4, 101, "P", TRUE, "Act/Act", 2)
 #' b <- bond("2045-02-15", 2.5, "2015-02-17", "Act/Act", 2, 100, id = "ABCD")
-#' calc_dv01(b, "2015-05-15", 101, "P", TRUE)
+#' calc_risk(b, "2015-05-15", 101, "P", TRUE)
 #' @export
-calc_dv01  <- function(x, ...){
-  UseMethod("calc_dv01")
+calc_risk  <- function(x, ...){
+  UseMethod("calc_risk")
 }
 
-#' @rdname calc_dv01
+#' @rdname calc_risk
 #' @export
-calc_dv01.default <- function(maturity, settle, coupon, price_yield, 
+calc_risk.default <- function(maturity, settle, coupon, price_yield, 
                               input_type = "Y", returnCFs = FALSE,
                               conv = "30/360", freq = 2){
   if(!(conv %in% c("30/360", "Act/Act", "Act/365")))
@@ -672,13 +672,13 @@ calc_dv01.default <- function(maturity, settle, coupon, price_yield,
   }
   else{yield <- price_yield}
   
-  dv01 <- calc_dv01.bond(b, settle, yield, returnCFs = returnCFs)
-  dv01
+  risk <- calc_risk.bond(b, settle, yield, returnCFs = returnCFs)
+  risk
 }
 
-#' @rdname calc_dv01
+#' @rdname calc_risk
 #' @export
-calc_dv01.bond <- function(b, settle, price_yield,
+calc_risk.bond <- function(b, settle, price_yield,
                            input_type = "Y", returnCFs = FALSE){
   settle <- try_parse_date(settle)
   
@@ -694,31 +694,31 @@ calc_dv01.bond <- function(b, settle, price_yield,
   if(length(cfs) == 1)
   {    
     cfs <- cfs$maturity
-    dv01 <- dv01_cfs_single(cfs, settle, yield, conv, freq, TRUE)
+    risk <- dv01_cfs_single(cfs, settle, yield, conv, freq, TRUE)
     
     if(!returnCFs)
     {
       workout_date <- max(cfs$cf_date)
-      dv01 <- colSums(dv01[-1:-7])
-      attr(dv01, "workout_type") <- "maturity"
-      attr(dv01, "workout_date") <- workout_date
+      risk <- colSums(risk[-1:-7])
+      attr(risk, "workout_type") <- "maturity"
+      attr(risk, "workout_date") <- workout_date
     }
   }
   else
   {
-    dv01 <- lapply(cfs, dv01_cfs_single, settle, yield, conv, freq, TRUE)
-    dirty_px <- lapply(mapply(`[[`, dv01, "PV"), sum)
+    risk <- lapply(cfs, dv01_cfs_single, settle, yield, conv, freq, TRUE)
+    dirty_px <- lapply(mapply(`[[`, risk, "PV"), sum)
     worst_index <- which.min(dirty_px)
     worst_type <- names(dirty_px)[worst_index]
-    dv01 <- dv01[[worst_index]]
+    risk <- risk[[worst_index]]
     workout_date <- max(cfs[[worst_index]]$cf_date)   
     
     if(!returnCFs){
-      dv01 <- colSums(dv01[-1:-7])
+      risk <- colSums(risk[-1:-7])
     }
-    attr(dv01, "workout_type") <- "maturity"
-    attr(dv01, "workout_date") <- max(cfs[[worst_index]]$cf_date)   
+    attr(risk, "workout_type") <- "maturity"
+    attr(risk, "workout_date") <- max(cfs[[worst_index]]$cf_date)   
   }
   
-  round(dv01, 8)
+  round(risk, 8)
 }

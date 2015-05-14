@@ -54,10 +54,10 @@ Other pricing functions: \code{\link{acc_int}};
   \code{\link{calc_dirty_px}},
   \code{\link{calc_dirty_px.bond}},
   \code{\link{calc_dirty_px.default}};
-  \code{\link{calc_dv01}}, \code{\link{calc_dv01.bond}},
-  \code{\link{calc_dv01.default}};
+  \code{\link{calc_risk}}, \code{\link{calc_risk.bond}},
+  \code{\link{calc_risk.default}};
   \code{\link{discount_cfs_single}};
-  \code{\link{dv01_cfs_single}};
+  \code{\link{risk_cfs_single}};
   \code{\link{yield_cfs_single}}; \code{\link{ytm}}
 }
 
