@@ -16,7 +16,7 @@
 create_cf_amounts <- function(num, coupon, freq, redemption = 100){
   cfs <- vector("numeric", length = (num + 1))
   cfs[1] <- 0
-  cfs[2:(num + 1)] <- rep(coupon / freq, num)
+  cfs[2:(num + 1)] <- rep.int(coupon / freq, num)
   cfs[length(cfs)] <- cfs[length(cfs)] + redemption
   cfs
 }

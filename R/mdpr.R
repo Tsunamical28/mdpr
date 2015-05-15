@@ -6,11 +6,12 @@
 #' value metrics.
 #'
 #'
-#' To learn more about mdpr, ask Wong.
 #'
 #' @docType package
 #' @name mdpr
 #' @importFrom plyr round_any
 #' @importFrom NMOF DEopt
 #' @importFrom zoo as.Date
+#' @importFrom dplyr tbl_df filter mutate dense_rank
+#' @importFrom lubridate floor_date parse_date_time day days month months year years
 NULL

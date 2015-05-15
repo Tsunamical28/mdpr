@@ -11,7 +11,4 @@ government bonds. Functionality will include pricing (clean and dirty price, yie
 worst, and assorted other functions), risk analysis (dv01, convexity, etc.), and relative
 value metrics.
 }
-\details{
-To learn more about mdpr, ask Wong.
-}
 
