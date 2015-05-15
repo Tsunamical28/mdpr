@@ -1,5 +1,33 @@
 # Date Utility Functions --------------------------------------------------
 
+
+#' Parse Date If Necessary
+#' 
+#' Since atomic objects can only have one type, it is unnecessary to check the type of
+#' each element in the vector. This function checks the type on the vector level to 
+#' determine whether it needs to operate \code{parse_date_time} for \code{d} on a 
+#' vectorized basis.
+#' 
+#' @param d vector of elements that may or may not be type Date
+#' @return Date type vector with NA for a particular element in \code{d} if it were 
+#' not parsable
+#' @examples
+#' try_parse_date(as.Date(c("2015-01-01","2015-08-08")))
+#' try_parse_date(c("2015-01-01","blah"))
+#' @export
+try_parse_date <- function (d) {
+  #Test on the vector level if the type is Date
+  if(!is.Date(d)){
+    d <- as.Date(parse_date_time(d, c("ymd","mdy")))
+  }
+  else
+  {
+    d
+  }
+  d
+}
+
+
 #' Count Days in Year
 #' 
 #' Counts the number of days in year via the provided day count convention.
