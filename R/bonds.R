@@ -695,7 +695,7 @@ calc_risk.bond <- function(b, settle, price_yield,
   if(length(cfs) == 1)
   {    
     cfs <- cfs$maturity
-    risk <- dv01_cfs_single(cfs, settle, yield, conv, freq, TRUE)
+    risk <- risk_cfs_single(cfs, settle, yield, conv, freq, TRUE)
     
     if(!returnCFs)
     {
