@@ -703,6 +703,7 @@ calc_risk.bond <- function(b, settle, price_yield,
       risk <- colSums(risk[-1:-7])
       attr(risk, "workout_type") <- "maturity"
       attr(risk, "workout_date") <- workout_date
+      round(risk, 8)
     }
   }
   else
@@ -716,12 +717,13 @@ calc_risk.bond <- function(b, settle, price_yield,
     
     if(!returnCFs){
       risk <- colSums(risk[-1:-7])
+      round(risk, 8)
     }
     attr(risk, "workout_type") <- worst_type
     attr(risk, "workout_date") <- max(cfs[[worst_index]]$cf_date)   
   }
   
-  round(risk, 8)
+  risk
 }
 
 #' @rdname calc_risk
