@@ -738,8 +738,8 @@ calc_dv01.default <- function(maturity, settle, coupon, price_yield,
   risk <- calc_risk(maturity, settle, coupon, price_yield,
                     input_type, returnCFs = FALSE)
   dv01 <- risk["dv01"]
-  attr(dv01, "workout_date") <- attr(risk, "workout_date")
   attr(dv01, "workout_type") <- attr(risk, "workout_type")  
+  attr(dv01, "workout_date") <- attr(risk, "workout_date")
   dv01
 }
 
@@ -749,7 +749,7 @@ calc_dv01.bond <- function(b, settle, price_yield,
                              input_type = "Y"){
   risk <- calc_risk(b, settle, price_yield, input_type, returnCFs = FALSE)
   dv01 <- risk["dv01"]
-  attr(dv01, "workout_date") <- attr(risk, "workout_date")
   attr(dv01, "workout_type") <- attr(risk, "workout_type")  
+  attr(dv01, "workout_date") <- attr(risk, "workout_date")
   dv01
 }
