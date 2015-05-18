@@ -15,4 +15,5 @@
 #' @importFrom magrittr %>%
 #' @importFrom dplyr tbl_df filter mutate dense_rank bind_rows
 #' @importFrom lubridate floor_date parse_date_time day days month year years is.Date
+#' @importFrom RODBC odbcDriverConnect odbcClose sqlQuery
 NULL

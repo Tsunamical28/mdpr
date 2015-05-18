@@ -58,3 +58,40 @@ safe_ifelse <- function(cond, yes, no, class_to_use = class(no)){
 #' @export
 round_any_v <- Vectorize(round_any, c("x","accuracy"))
 
+
+#' Query Database and Return Results
+#' 
+#' Wrapper for RODBC odbcDriverConnect with default values for cetain
+#' parameters. The connection defaults to the production server and
+#' the Muni DB. The result is returned as a \code{tbl_df} with strings
+#' represented as characters instead of factors.
+#' 
+#' @param query Character string database query in MS SQL SERVER T-SQL format.
+#' @param stringsAsFactors Boolean value as in base R
+#' @param server Server name as a character string
+#' @param database Database name as a character string
+#' @param uid User ID as a character string
+#' @param pwd Password as a character string
+#' @return \code{tbl_df} containing the results of the query
+#' @examples
+#' close_date <- as.Date("2015-05-14")
+#' as_of_datetime <- Sys.time()
+#' lubridate::hour(as_of_datetime) <- 23;
+#' lubridate::minute(as_of_datetime) <- 59;
+#' lubridate::second(as_of_datetime) <- 59
+#' qry <- paste("R_LoadMuniDeskPositions '",
+#'            as.character(close_date),"','", as.character(as_of_datetime),"','",
+#'            paste(c_exempt_accounts, c_taxable_accounts,
+#'            c_tsy_accounts,sep = ",",collapse=","),"'")
+#' dbQuery(qry)
+#' @export
+dbQuery <- function(query, stringsAsFactors = FALSE, 
+                    server = c_server, database = c_database, 
+                    uid = c_uid, pwd = c_pwd){
+  channel <- odbcDriverConnect(paste0("driver=SQL Server; server=", server, 
+                                      "; database=", database ,"; uid=",
+                                      uid, ";pwd=", pwd))
+  results <- tbl_df(sqlQuery(channel, query, stringsAsFactors = stringsAsFactors))
+  odbcClose(channel)
+  results
+}

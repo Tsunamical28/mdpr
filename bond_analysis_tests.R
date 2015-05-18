@@ -1,5 +1,5 @@
-library(devtools)
-install_github("Tsunamical28/mdpr")
+# library(devtools)
+# install_github("Tsunamical28/mdpr")
 library(mdpr)
 require(RODBC)
 require(tidyr)
@@ -51,7 +51,7 @@ tax_lookup <- rename(tax_lookup,
                      tax_status = mapping)
 
 
-fields <- c("ID_CUSIP","MARKET_SECTOR_DES", "ISSUER_BULK", "ISSUER_DESCRIPTION_2ND_LINE_BULK", "CPN",
+muni_bbg_fields <- c("ID_CUSIP","MARKET_SECTOR_DES", "ISSUER_BULK", "ISSUER_DESCRIPTION_2ND_LINE_BULK", "CPN",
             "MATURITY","WORKOUT_DT_BID", "NXT_CALL_DT", "NXT_CALL_PX", "SETTLE_DT",
             "STATE_CODE", "CPN_TYP","MUNI_TAX_PROV")
 
