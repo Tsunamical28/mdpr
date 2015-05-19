@@ -10,12 +10,12 @@ load_config(filename)
 \item{filename}{Path and filename to be loaded}
 }
 \value{
-Nothing. Assignment occurs directly
+Environment containing all the assigned variables
 }
 \description{
 Given a .txt filename, this will parse out key value pairs separated
-by "=" and assign the value to the key in the environment which called
-the function. The file should end in a new line character to avoid any
-warnings.
+by "=" and assign the value to the key in a new environment.
+The file should end in a new line character to avoid any warnings. Users
+can access the variables with the base R command \code{get()}
 }
 

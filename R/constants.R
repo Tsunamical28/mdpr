@@ -1,19 +1,33 @@
 # Startup defaults --------------------------------------------------------
+c_server <- NULL
+c_database <- NULL
+c_uid <- NULL
+c_pwd <- NULL
+c_close_date <- NULL
+c_as_of_datetime <- NULL
 
-.onAttach <- function(libname, pkgname){
+
+
+.onAttach<- function(libname, pkgname){
   # Database Defaults -----------------------------------------------------
-  load_config("S:/Old Orchard/Development/R/mdpr_package/db_config.txt")
+  db_configs <- load_config("S:/Old Orchard/Development/R/mdpr_package/db_config.txt")
+  c_server <- get("c_server", envir = db_configs)
+  c_database <- get("c_database", envir = db_configs)
+  c_uid <- get("c_uid", envir = db_configs)
+  c_pwd <- get("c_pwd", envir = db_configs)
+  rm(db_configs)
+  
   
   #Default dates based on date that package is attached
-  c_close_date <- Sys.Date()
-  c_close_date <- as.Date(dbQuery(paste0(
-                    "SELECT CalendarDate
-                    FROM [Architect].[dbo].[CAL_BusDay]
-                    WHERE NextBusinessDate = '", c_close_date, "'")))  
-  c_as_of_datetime <- Sys.time()
-  lubridate::hour(c_as_of_datetime) <- 23;
-  lubridate::minute(c_as_of_datetime) <- 59;
-  lubridate::second(c_as_of_datetime) <- 59
+#   c_close_date <- Sys.Date()
+#   c_close_date <- as.Date(dbQuery(paste0(
+#                     "SELECT CalendarDate
+#                     FROM [Architect].[dbo].[CAL_BusDay]
+#                     WHERE NextBusinessDate = '", c_close_date, "'")))  
+#   c_as_of_datetime <- Sys.time()
+#   lubridate::hour(c_as_of_datetime) <- 23;
+#   lubridate::minute(c_as_of_datetime) <- 59;
+#   lubridate::second(c_as_of_datetime) <- 59
   
   # Traders and Accounts ----------------------------------------------------
   

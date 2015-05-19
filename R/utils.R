@@ -103,16 +103,18 @@ dbQuery <- function(query, stringsAsFactors = FALSE,
 #' Load Configurations from a File
 #' 
 #' Given a .txt filename, this will parse out key value pairs separated
-#' by "=" and assign the value to the key in the environment which called
-#' the function. The file should end in a new line character to avoid any
-#' warnings.
+#' by "=" and assign the value to the key in a new environment.
+#' The file should end in a new line character to avoid any warnings. Users
+#' can access the variables with the base R command \code{get()}
 #' 
 #' @param filename Path and filename to be loaded
-#' @return Nothing. Assignment occurs directly
+#' @return Environment containing all the assigned variables
 #' @export
 load_config <- function (filename) {
+  conf.vars <- new.env()
   tmp <- read.table(filename, sep = "=", stringsAsFactors = FALSE)
   for(i in 1:nrow(tmp)){
-    assign(tmp[i, 1], tmp[i, 2], envir = parent.env(environment()))
+    assign(tmp[i, 1], tmp[i, 2], envir = conf.vars)
   }
+  conf.vars
 }
