@@ -87,7 +87,7 @@ round_any_v <- Vectorize(round_any, c("x","accuracy"))
 #' dbQuery(qry)
 #' @export
 dbQuery <- function(query, stringsAsFactors = FALSE, 
-                    server = c_server, database = c_database, 
+                    server = mdpr_globals$c_server, database = c_database, 
                     uid = c_uid, pwd = c_pwd){
   channel <- odbcDriverConnect(paste0("driver=SQL Server; server=", server, 
                                       "; database=", database ,"; uid=",
@@ -132,15 +132,15 @@ assign("c_pwd", db_configs$c_pwd, mdpr_globals)
 
 
 # Default dates based on date that package is attached
-c_close_date <- Sys.Date()
-c_close_date <- as.Date(dbQuery(paste0(
-  "SELECT CalendarDate
-  FROM [Architect].[dbo].[CAL_BusDay]
-  WHERE NextBusinessDate = '", c_close_date, "'")))  
-c_as_of_datetime <- Sys.time()
-lubridate::hour(c_as_of_datetime) <- 23;
-lubridate::minute(c_as_of_datetime) <- 59;
-lubridate::second(c_as_of_datetime) <- 59
+# c_close_date <- Sys.Date()
+# c_close_date <- as.Date(dbQuery(paste0(
+#   "SELECT CalendarDate
+#   FROM [Architect].[dbo].[CAL_BusDay]
+#   WHERE NextBusinessDate = '", c_close_date, "'")))  
+# c_as_of_datetime <- Sys.time()
+# lubridate::hour(c_as_of_datetime) <- 23;
+# lubridate::minute(c_as_of_datetime) <- 59;
+# lubridate::second(c_as_of_datetime) <- 59
 
 
 # Traders and Accounts ----------------------------------------------------
@@ -249,5 +249,6 @@ attach(mdpr_globals)
 # .onAttach <- function(libname, pkgname){
 #   attach(mdpr_globals)
 # }
+
 
 
