@@ -64,7 +64,8 @@ round_any_v <- Vectorize(round_any, c("x","accuracy"))
 #' Wrapper for RODBC odbcDriverConnect with default values for cetain
 #' parameters. The connection defaults to the production server and
 #' the Muni DB. The result is returned as a \code{tbl_df} with strings
-#' represented as characters instead of factors.
+#' represented as characters instead of factors, unless it is only one
+#' column, in which case it is returned as a vector.
 #' 
 #' @param query Character string database query in MS SQL SERVER T-SQL format.
 #' @param stringsAsFactors Boolean value as in base R
@@ -72,7 +73,7 @@ round_any_v <- Vectorize(round_any, c("x","accuracy"))
 #' @param database Database name as a character string
 #' @param uid User ID as a character string
 #' @param pwd Password as a character string
-#' @return \code{tbl_df} containing the results of the query
+#' @return \code{tbl_df} containing the results of the query or a vector
 #' @examples
 #' close_date <- as.Date("2015-05-14")
 #' as_of_datetime <- Sys.time()
@@ -93,5 +94,8 @@ dbQuery <- function(query, stringsAsFactors = FALSE,
                                       uid, ";pwd=", pwd))
   results <- tbl_df(sqlQuery(channel, query, stringsAsFactors = stringsAsFactors))
   odbcClose(channel)
-  results
+  if(length(results) == 1){
+    results <- results[[1]]
+  }
+  results 
 }
