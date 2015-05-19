@@ -132,6 +132,6 @@ tax_status_lookup <- data.frame(muni_tax_prov =
 
 
 
-.onAttach(libname, pkgname){
+.onAttach <- function(libname, pkgname){
   attach(mdpr_globals)
 }
