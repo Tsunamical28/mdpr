@@ -1,10 +1,10 @@
 # Startup defaults --------------------------------------------------------
-c_server <- NULL
-c_database <- NULL
-c_uid <- NULL
-c_pwd <- NULL
-c_close_date <- NULL
-c_as_of_datetime <- NULL
+# c_server <- NULL
+# c_database <- NULL
+# c_uid <- NULL
+# c_pwd <- NULL
+# c_close_date <- NULL
+# c_as_of_datetime <- NULL
 
 
 
