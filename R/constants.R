@@ -2,7 +2,7 @@
 
 .onAttach <- function(libname, pkgname){
   # Database Defaults -----------------------------------------------------
-  source("S:/Old Orchard/Development/R/mdpr_package/db_config.R")
+  source("S:/Old Orchard/Development/R/mdpr_package/db_config.R", local = TRUE)
   
   #Default dates based on date that package is attached
   c_close_date <- Sys.Date()
