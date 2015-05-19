@@ -28,16 +28,16 @@ assign("c_uid", db_configs$c_uid, mdpr_globals)
 assign("c_pwd", db_configs$c_pwd, mdpr_globals)
 
 
-#Default dates based on date that package is attached
-#   c_close_date <- Sys.Date()
-#   c_close_date <- as.Date(dbQuery(paste0(
-#                     "SELECT CalendarDate
-#                     FROM [Architect].[dbo].[CAL_BusDay]
-#                     WHERE NextBusinessDate = '", c_close_date, "'")))  
-#   c_as_of_datetime <- Sys.time()
-#   lubridate::hour(c_as_of_datetime) <- 23;
-#   lubridate::minute(c_as_of_datetime) <- 59;
-#   lubridate::second(c_as_of_datetime) <- 59
+# Default dates based on date that package is attached
+  c_close_date <- Sys.Date()
+  c_close_date <- as.Date(dbQuery(paste0(
+                    "SELECT CalendarDate
+                    FROM [Architect].[dbo].[CAL_BusDay]
+                    WHERE NextBusinessDate = '", c_close_date, "'")))  
+  c_as_of_datetime <- Sys.time()
+  lubridate::hour(c_as_of_datetime) <- 23;
+  lubridate::minute(c_as_of_datetime) <- 59;
+  lubridate::second(c_as_of_datetime) <- 59
 
 
 # Traders and Accounts ----------------------------------------------------
@@ -48,7 +48,7 @@ assign("c_trader_inits", c_trader_inits, mdpr_globals)
 
 c_exempt_accounts <- paste0(c_trader_inits, "-EX")
 c_exempt_accounts <- factor(c_exempt_accounts, levels = c_exempt_accounts)
-assign("c_exempt_accounts ", c_exempt_accounts, mdpr_globals)
+assign("c_exempt_accounts", c_exempt_accounts, mdpr_globals)
 
 c_taxable_accounts <- paste0(c_trader_inits, "-TAX")
 c_taxable_accounts <- factor(c_taxable_accounts, levels = c_taxable_accounts)
@@ -66,27 +66,36 @@ c_muni_bbg_fields <- c("ID_CUSIP","MARKET_SECTOR_DES", "ISSUER_BULK",
                        "MATURITY","WORKOUT_DT_BID", "NXT_CALL_DT", 
                        "NXT_CALL_PX", "SETTLE_DT", "STATE_CODE",
                        "CPN_TYP","MUNI_TAX_PROV")
-
+assign("c_muni_bbg_fields", c_muni_bbg_fields, mdpr_globals)
 
 c_bma_tenors <- c(1:5, 7, 10, 12, 15, 20, 25, 30)
+assign("c_bma_tenors", c_bma_tenors, mdpr_globals)
+
 c_bma_securities <- paste0("USSMSB", c_bma_tenors, " Curncy")
 c_bma_securities <- factor(c_bma_securities, levels = c_bma_securities)
+assign("c_bma_securities", c_bma_securities, mdpr_globals)
+
 c_bma_bbg_fields <- c("PX_LAST")
+assign("c_bma_bbg_fields", c_bma_bbg_fields, mdpr_globals)
 
 
 c_tsy_bbg_fields <- c("ID_CUSIP", "CPN", "MATURITY","ISSUE_DT", 
                       "SETTLE_DT", "PX_LAST" )
+assign("c_tsy_bbg_fields", c_tsy_bbg_fields, mdpr_globals)
+
 c_tsy_hedge_maturities <- c(5, 7, 10, 30)
 c_tsy_hedge_letters <- c("","B")
 c_tsy_hedges <- paste(mapply(paste0, paste0("CT", c_tsy_hedge_maturities), 
                              rep(c_tsy_hedge_letters, 
                                  each = length(c_tsy_hedge_maturities))), "Govt")
 c_tsy_hedges <- factor(c_tsy_hedges, levels = c_tsy_hedges)
+assign("c_tsy_hedges", c_tsy_hedges, mdpr_globals)
 
 
 # Analysis Defaults -------------------------------------------------------
 
-c_curve_shocks_default <- seq(-1.00, 1.00, by = 0.10)
+c_curve_shocks <- seq(-1.00, 1.00, by = 0.10)
+assign("c_curve_shocks", c_curve_shocks, mdpr_globals)
 
 
 # Lookup Tables -----------------------------------------------------------
@@ -130,7 +139,8 @@ tax_status_lookup <- data.frame(muni_tax_prov =
                                     "EXEMPT")
 )
 
-
+assign("tax_status_lookup", tax_status_lookup, mdpr_globals)
+rm(tax_status_lookup)
 
 .onAttach <- function(libname, pkgname){
   attach(mdpr_globals)
