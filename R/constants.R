@@ -10,12 +10,11 @@
 
 .onAttach<- function(libname, pkgname){
   # Database Defaults -----------------------------------------------------
-  db_configs <<- load_config("S:/Old Orchard/Development/R/mdpr_package/db_config.txt")
+  db_configs <- load_config("S:/Old Orchard/Development/R/mdpr_package/db_config.txt")
   c_server <<- get("c_server", envir = db_configs)
   c_database <<- get("c_database", envir = db_configs)
   c_uid <<- get("c_uid", envir = db_configs)
   c_pwd <<- get("c_pwd", envir = db_configs)
-  rm(db_configs)
   
   
   #Default dates based on date that package is attached
