@@ -21,13 +21,14 @@ dbQuery(query, stringsAsFactors = FALSE, server = c_server,
 \item{pwd}{Password as a character string}
 }
 \value{
-\code{tbl_df} containing the results of the query
+\code{tbl_df} containing the results of the query or a vector
 }
 \description{
 Wrapper for RODBC odbcDriverConnect with default values for cetain
 parameters. The connection defaults to the production server and
 the Muni DB. The result is returned as a \code{tbl_df} with strings
-represented as characters instead of factors.
+represented as characters instead of factors, unless it is only one
+column, in which case it is returned as a vector.
 }
 \examples{
 close_date <- as.Date("2015-05-14")
