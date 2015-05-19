@@ -31,13 +31,8 @@ represented as characters instead of factors, unless it is only one
 column, in which case it is returned as a vector.
 }
 \examples{
-close_date <- as.Date("2015-05-14")
-as_of_datetime <- Sys.time()
-lubridate::hour(as_of_datetime) <- 23;
-lubridate::minute(as_of_datetime) <- 59;
-lubridate::second(as_of_datetime) <- 59
 qry <- paste("R_LoadMuniDeskPositions '",
-           as.character(close_date),"','", as.character(as_of_datetime),"','",
+           as.character(c_close_date),"','", as.character(c_as_of_datetime),"','",
            paste(c_exempt_accounts, c_taxable_accounts,
            c_tsy_accounts,sep = ",",collapse=","),"'")
 dbQuery(qry)
