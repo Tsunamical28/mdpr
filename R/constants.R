@@ -1,10 +1,10 @@
 # Startup defaults --------------------------------------------------------
 
-.onLoad <- function(libname, pkgname){
+.onAttach <- function(libname, pkgname){
   # Database Defaults
   source("S:/Old Orchard/Development/R/mdpr_package/db_config.R")
   
-  #Default dates based on date that package is loaded
+  #Default dates based on date that package is attached
   c_close_date <- Sys.Date()
   c_close_date <- as.Date(dbQuery(paste0(
                     "SELECT CalendarDate
