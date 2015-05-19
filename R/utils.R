@@ -83,14 +83,31 @@ round_any_v <- Vectorize(round_any, c("x","accuracy"))
 #' @export
 dbQuery <- function(query, stringsAsFactors = FALSE, 
                     server = c_server, database = c_database, 
-                    uid = c_uid, pwd = c_pwd){
+                    uid = c_uid, pwd = c_pwd){  
   channel <- odbcDriverConnect(paste0("driver=SQL Server; server=", server, 
                                       "; database=", database ,"; uid=",
                                       uid, ";pwd=", pwd))
+  on.exit(odbcClose(channel))
   results <- tbl_df(sqlQuery(channel, query, stringsAsFactors = stringsAsFactors))
-  odbcClose(channel)
+#   odbcClose(channel)
   if(dim(results)[2] == 1 | is.na(dim(results)[2])){
     results <- structure(simplify2array(results)[[1]], class = class(results[[1]]))
   }
   results 
+}
+
+
+#' Wrap Text in Apostrophes
+#' 
+#' Returns its argument wrapped in apostrophes. This can be used
+#' when passing dates to SQL SERVER or for other similar 
+#' applications.
+#' 
+#' @param text Text to be wrapped in apostrophes
+#' @return The text wrapped in apostrophes
+#' @examples
+#' qt("2015-05-01")
+#' @export
+qt <- function(text){
+  paste0("'", text, "'")
 }

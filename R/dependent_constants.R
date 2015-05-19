@@ -11,11 +11,12 @@
 #' get_close_date()
 #' @export
 get_close_date <- function(date = Sys.Date()){  
-    as.Date(dbQuery(paste0(
-      "SELECT CalendarDate
-            FROM [Architect].[dbo].[CAL_BusDay]
-            WHERE NextBusinessDate = '", date, "' AND
-            CalendarTypeID = 2 AND IsBusinessDay = 1")))
+    date <- as.Date(dbQuery(paste0(
+              "SELECT PriorBusinessDate AS CalendarDate 
+                    FROM [Architect].[dbo].[CAL_BusDay]
+                    WHERE CalendarDate = ", qt(date), " AND
+                    CalendarTypeID = 2")))
+    date
 }
 
 #' Get End of Day
