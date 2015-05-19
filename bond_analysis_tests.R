@@ -19,12 +19,12 @@ as_of_datetime <- get_eod()
 
 
 bond_pos <- dbQuery(paste("R_LoadMuniDeskPositions ",
-                          qt(close_date), ",", qt(as_of_datetime), ",'",
+                          sqt(close_date), ",", sqt(as_of_datetime), ",'",
                           paste(c_exempt_accounts, c_taxable_accounts,
-                                c_tsy_accounts,sep = ",",collapse=","),"'"))
+                                c_tsy_accounts, sep = ",",collapse=","),"'"))
 
-swap_pos <- dbQuery(paste("R_LoadMRLPositions ", qt(close_date), ", ",
-                          qt(as_of_datetime),", '",
+swap_pos <- dbQuery(paste("R_LoadMRLPositions ", sqt(close_date), ", ",
+                          sqt(as_of_datetime),", '",
                           paste(c_exempt_accounts, collapse=","),"'"))
 
 bond_pos <- transform(bond_pos, initials = 
@@ -36,12 +36,12 @@ bbg_securities <- unique(paste(bond_pos$cusip,bond_pos$yellow_key))
 
 conn <- blpConnect()
 bbg_data <- tbl_df(bdp(conn, bbg_securities , c_muni_bbg_fields))
-bbg_bma_data <- tbl_df(bdh(conn, c_bma_securities, c_bma_fields, 
+bbg_bma_data <- tbl_df(bdh(conn, c_bma_securities, c_bma_bbg_fields, 
                            close_date, close_date))
 blpDisconnect(conn)
 
 bbg_bma_data <- bbg_bma_data %>%
-  mutate(tenor = bma_tenors, maturity = close_date + years(tenor)) %>%
+  mutate(tenor = c_bma_tenors, maturity = close_date + years(tenor)) %>%
   rename(rate = PX_LAST) %>%
   select(tenor, maturity, rate)
 
@@ -68,7 +68,7 @@ bbg_data <- bbg_data %>%
          workout_date = as.Date(workout_date),
          call_date = as.Date(call_date),
          settle_date = as.Date(settle_date)) %>%
-  left_join(tax_status_lookup,by = "muni_tax_prov")
+  left_join(tax_status_lookup, by = "muni_tax_prov")
 bbg_data[bbg_data$yellow_key == "Corp", "tax_status"] <- "TAXABLE" #for the corporate cusip munis
 
 pos_data <- bond_pos %>% 

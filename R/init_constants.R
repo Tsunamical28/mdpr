@@ -124,7 +124,8 @@ tax_status_lookup <- data.frame(muni_tax_prov =
                                     "TAXABLE",
                                     "TAXABLE",
                                     "TAXABLE",
-                                    "EXEMPT")
+                                    "EXEMPT"),
+                                stringsAsFactors = FALSE
 )
 
 assign("tax_status_lookup", tax_status_lookup, mdpr_globals)
