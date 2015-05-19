@@ -106,8 +106,8 @@ dbQuery <- function(query, stringsAsFactors = FALSE,
 #' @param text Text to be wrapped in apostrophes
 #' @return The text wrapped in apostrophes
 #' @examples
-#' qt("2015-05-01")
+#' sqt("2015-05-01")
 #' @export
-qt <- function(text){
+sqt <- function(text){
   paste0("'", text, "'")
 }

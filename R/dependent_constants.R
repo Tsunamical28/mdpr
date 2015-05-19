@@ -14,7 +14,7 @@ get_close_date <- function(date = Sys.Date()){
     date <- as.Date(dbQuery(paste0(
               "SELECT PriorBusinessDate AS CalendarDate 
                     FROM [Architect].[dbo].[CAL_BusDay]
-                    WHERE CalendarDate = ", qt(date), " AND
+                    WHERE CalendarDate = ", sqt(date), " AND
                     CalendarTypeID = 2")))
     date
 }

@@ -1,6 +1,5 @@
 # library(devtools)
 # install_github("Tsunamical28/mdpr")
-library(mdpr)
 require(RODBC)
 require(tidyr)
 require(dplyr)
@@ -10,62 +9,35 @@ require(zoo)
 require(ggplot2)
 require(scales)
 require(NMOF)
+require(mdpr)
 
 ######################MUNI POSITIONS####################
 
-close_date <- as.Date("2015-05-14")
+close_date <- get_close_date()
 
-as_of_datetime <- Sys.time()
-hour(as_of_datetime) <- 23; minute(as_of_datetime) <- 59; second(as_of_datetime) <- 59
-trader_inits <- c("RJ", "LF", "MB", "EM", "OOC", "GHC")
-exempt_accounts <- paste0(trader_inits, "-EX")
-taxable_accounts <- paste0(trader_inits, "-TAX")
-tsy_accounts <- paste0(trader_inits, "-TSY")
+as_of_datetime <- get_eod()
 
 
-channel <- odbcDriverConnect("driver=SQL Server;
-                             server=nj1pvsql01;uid=sql_Munidesk_App;pwd=Munidesk!")
-bond_pos <- tbl_df(sqlQuery(channel,
-                            paste("R_LoadMuniDeskPositions '",
-                                  as.character(close_date),"','", as.character(as_of_datetime),"','",
-                                  paste(exempt_accounts, taxable_accounts,
-                                        tsy_accounts,sep = ",",collapse=","),"'"), 
-                            stringsAsFactors = F))
+bond_pos <- dbQuery(paste("R_LoadMuniDeskPositions ",
+                          qt(close_date), ",", qt(as_of_datetime), ",'",
+                          paste(c_exempt_accounts, c_taxable_accounts,
+                                c_tsy_accounts,sep = ",",collapse=","),"'"))
 
-swap_pos <- tbl_df(sqlQuery(channel,
-                            paste("R_LoadMRLPositions '",
-                                  as.character(close_date),"','", as.character(as_of_datetime),"','",
-                                  paste(exempt_accounts,collapse=","),"'"),
-                            stringsAsFactors = F))
+swap_pos <- dbQuery(paste("R_LoadMRLPositions ", qt(close_date), ", ",
+                          qt(as_of_datetime),", '",
+                          paste(c_exempt_accounts, collapse=","),"'"))
 
-tax_lookup <- tbl_df(sqlQuery(channel,"SELECT description, mapping 
-                              FROM mdp_lookup WHERE lookup_type = 'Tax Provision'",
-                              stringsAsFactors = F))
-odbcClose(channel)
-
-bond_pos <- transform(bond_pos, initials = factor(initials, 
-                                                  levels = c("RJ", "LF","MB","EM","OOC","GHC")))
-
-tax_lookup <- rename(tax_lookup,
-                     muni_tax_prov = description,
-                     tax_status = mapping)
-
-
-muni_bbg_fields <- c("ID_CUSIP","MARKET_SECTOR_DES", "ISSUER_BULK", "ISSUER_DESCRIPTION_2ND_LINE_BULK", "CPN",
-            "MATURITY","WORKOUT_DT_BID", "NXT_CALL_DT", "NXT_CALL_PX", "SETTLE_DT",
-            "STATE_CODE", "CPN_TYP","MUNI_TAX_PROV")
+bond_pos <- transform(bond_pos, initials = 
+                        factor(initials, levels = c("RJ", "LF","MB",
+                                                    "EM","OOC","GHC")))
 
 bbg_securities <- unique(paste(bond_pos$cusip,bond_pos$yellow_key))
 
-bma_tenors <- c(1:5, 7, 10, 12, 15, 20, 25, 30)
-bma_securities <- paste0("USSMSB", bma_tenors, " Curncy")
-bma_fields <- c("PX_LAST")
-
-
 
 conn <- blpConnect()
-bbg_data <- tbl_df(bdp(conn, bbg_securities ,fields))
-bbg_bma_data <- tbl_df(bdh(conn, bma_securities, bma_fields, close_date, close_date))
+bbg_data <- tbl_df(bdp(conn, bbg_securities , c_muni_bbg_fields))
+bbg_bma_data <- tbl_df(bdh(conn, c_bma_securities, c_bma_fields, 
+                           close_date, close_date))
 blpDisconnect(conn)
 
 bbg_bma_data <- bbg_bma_data %>%
@@ -96,7 +68,7 @@ bbg_data <- bbg_data %>%
          workout_date = as.Date(workout_date),
          call_date = as.Date(call_date),
          settle_date = as.Date(settle_date)) %>%
-  left_join(tax_lookup,by = "muni_tax_prov")
+  left_join(tax_status_lookup,by = "muni_tax_prov")
 bbg_data[bbg_data$yellow_key == "Corp", "tax_status"] <- "TAXABLE" #for the corporate cusip munis
 
 pos_data <- bond_pos %>% 
