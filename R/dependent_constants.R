@@ -15,7 +15,7 @@ get_close_date <- function(date = Sys.Date()){
       "SELECT CalendarDate
             FROM [Architect].[dbo].[CAL_BusDay]
             WHERE NextBusinessDate = '", date, "' AND
-            CalendarType = 2")))
+            CalendarTypeID = 2")))
 }
 
 
