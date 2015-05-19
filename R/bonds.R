@@ -424,8 +424,9 @@ calc_clean_px.bond <- function(b, settle, yield){
 #' Yield or IRR for a Single Set of Cashflows with the Outflow
 #' 
 #' Used in \code{yield_cfs_single} to do the actual yield calc. 
-#' The \code{ytm} function from the NMOF manual is used to calculate
-#' the yield, with a 5\% initial guess. It assumes that the first
+#' The equivalent of the \code{ytm} function from the NMOF 
+#' manual is used to calculate the yield, with a 5\% initial guess. 
+#' It assumes that the first
 #' cashflow in the \code{cf} vector is negative as it is an outflow equal
 #' to the present value of the cashflows. The corresponding element
 #' in the \code{times} vector should be 0.
@@ -442,9 +443,9 @@ calc_clean_px.bond <- function(b, settle, yield){
 #' @examples
 #' cf <- c(-101, 3, 3, 3, 103)
 #' times <- c(0, 1, 2, 3, 4)
-#' ytm(cf, times)
+#' calc_ytm(cf, times)
 #' @export
-ytm <- function(cf, times, y0 = 0.05,
+calc_ytm <- function(cf, times, y0 = 0.05,
                 tol = 1e-05, maxit = 1000L) {        
   dr <- 1
   for (i in seq_len(maxit)) {
@@ -498,7 +499,7 @@ yield_cfs_single <- function(cfs, settle, coupon, conv = "30/360", freq = 2, cle
   
   amt <- c(-dirty_px , cfs$cf_amount)
   tm <- c(0, cfs$year_frac)
-  yield <- ytm(amt, tm, y0 = 0.05, tol = 1e-06, maxit = 1000L)
+  yield <- calc_ytm(amt, tm, y0 = 0.05, tol = 1e-06, maxit = 1000L)
   yield <- 100 * freq * ((1 + yield)^(1 / freq) - 1)
   
   yield
@@ -510,7 +511,7 @@ yield_cfs_single <- function(cfs, settle, coupon, conv = "30/360", freq = 2, cle
 #' will calculate the yield to worst of the \code{bond}. The workout dates
 #' used are the based on the \code{cfs} object's last cashflow dates in
 #' the \code{bond}. This function uses \code{yield_cfs_single}, which in 
-#' turn uses the imported function \code{NMOF::ytm} to do the actual
+#' turn uses the \code{calc_ytm} to do the actual
 #' calculations.
 #' 
 #' 
