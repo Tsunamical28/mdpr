@@ -15,9 +15,8 @@ get_close_date <- function(date = Sys.Date()){
       "SELECT CalendarDate
             FROM [Architect].[dbo].[CAL_BusDay]
             WHERE NextBusinessDate = '", date, "' AND
-            CalendarTypeID = 2")))
+            CalendarTypeID = 2 AND IsBusinessDay = 1")))
 }
-
 
 #' Get End of Day
 #' 
@@ -31,7 +30,8 @@ get_close_date <- function(date = Sys.Date()){
 #' @examples
 #' get_eod()
 #' @export
-get_eod <- function(date = Sys.time()){    
+get_eod <- function(date = Sys.time()){
+  date <- try_parse_date(date)
   lubridate::hour(date) <- 23;
   lubridate::minute(date) <- 59;
   lubridate::second(date) <- 59

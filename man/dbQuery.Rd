@@ -21,7 +21,7 @@ dbQuery(query, stringsAsFactors = FALSE, server = c_server,
 \item{pwd}{Password as a character string}
 }
 \value{
-\code{tbl_df} containing the results of the query or a vector
+\code{tbl_df} or vector containing the results of the query
 }
 \description{
 Wrapper for RODBC odbcDriverConnect with default values for cetain

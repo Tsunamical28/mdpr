@@ -73,7 +73,7 @@ round_any_v <- Vectorize(round_any, c("x","accuracy"))
 #' @param database Database name as a character string
 #' @param uid User ID as a character string
 #' @param pwd Password as a character string
-#' @return \code{tbl_df} containing the results of the query or a vector
+#' @return \code{tbl_df} or vector containing the results of the query
 #' @examples
 #' qry <- paste("R_LoadMuniDeskPositions '",
 #'            as.character(c_close_date),"','", as.character(c_as_of_datetime),"','",
@@ -89,8 +89,8 @@ dbQuery <- function(query, stringsAsFactors = FALSE,
                                       uid, ";pwd=", pwd))
   results <- tbl_df(sqlQuery(channel, query, stringsAsFactors = stringsAsFactors))
   odbcClose(channel)
-  if(length(results) == 1){
-    results <- results[[1]]
+  if(dim(results)[2] == 1 | is.na(dim(results)[2])){
+    results <- structure(simplify2array(results)[[1]], class = class(results[[1]]))
   }
   results 
 }

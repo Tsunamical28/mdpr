@@ -16,17 +16,15 @@
 #' try_parse_date(c("2015-01-01","blah"))
 #' @export
 try_parse_date <- function (d) {
-  #Test on the vector level if the type is Date
+  #Test on the vector level if the type is Date  
   if(!is.Date(d)){
-    d <- as.Date(parse_date_time(d, c("ymd","mdy")))
-  }
-  else
-  {
-    d
+    if(!lubridate::is.POSIXt(d)){
+      d <- parse_date_time(d, c("ymd","mdy"))
+    }
+    d <- as.Date(d)
   }
   d
 }
-
 
 #' Count Days in Year
 #' 
