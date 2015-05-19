@@ -24,8 +24,9 @@ Imports:
     RODBC (>= 1.3-11)
 Collate:
     'mdpr.R'
-    'constants.R'
+    'init_constants.R'
     'utils.R'    
     'date_utils.R'
+    'dependent_constants.R'
     'bonds.R'
     'things_to_do.R'
