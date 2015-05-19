@@ -129,3 +129,6 @@ tax_status_lookup <- data.frame(muni_tax_prov =
 
 assign("tax_status_lookup", tax_status_lookup, mdpr_globals)
 attach(mdpr_globals)
+
+
+assign("test123", "yabbadabbadoo", environment())
