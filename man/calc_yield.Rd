@@ -38,7 +38,7 @@ Given a \code{bond} or the necessary parameters to construct one, this
 will calculate the yield to worst of the \code{bond}. The workout dates
 used are the based on the \code{cfs} object's last cashflow dates in
 the \code{bond}. This function uses \code{yield_cfs_single}, which in
-turn uses the imported function \code{NMOF::ytm} to do the actual
+turn uses the \code{calc_ytm} to do the actual
 calculations.
 }
 \examples{
@@ -57,9 +57,9 @@ Other pricing functions: \code{\link{acc_int}};
   \code{\link{calc_dv01}}, \code{\link{calc_dv01.bond}},
   \code{\link{calc_dv01.default}}, \code{\link{calc_risk}},
   \code{\link{calc_risk.bond}},
-  \code{\link{calc_risk.default}};
+  \code{\link{calc_risk.default}}; \code{\link{calc_ytm}};
   \code{\link{discount_cfs_single}};
   \code{\link{risk_cfs_single}};
-  \code{\link{yield_cfs_single}}; \code{\link{ytm}}
+  \code{\link{yield_cfs_single}}
 }
 

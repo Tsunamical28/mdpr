@@ -53,9 +53,9 @@ Other pricing functions: \code{\link{acc_int}};
   \code{\link{calc_risk.bond}},
   \code{\link{calc_risk.default}};
   \code{\link{calc_yield}}, \code{\link{calc_yield.bond}},
-  \code{\link{calc_yield.default}};
+  \code{\link{calc_yield.default}}; \code{\link{calc_ytm}};
   \code{\link{discount_cfs_single}};
   \code{\link{risk_cfs_single}};
-  \code{\link{yield_cfs_single}}; \code{\link{ytm}}
+  \code{\link{yield_cfs_single}}
 }
 
