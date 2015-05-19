@@ -1,9 +1,21 @@
-# Database Defaults -------------------------------------------------------
+# Startup defaults --------------------------------------------------------
 
-c_server  <- "NJ1PVSQL01"
-c_database  <- "MuniRepository"
-c_uid <- "sql_Munidesk_App"
-c_pwd <- "Munidesk!"
+.onLoad <- function(libname, pkgname){
+  # Database Defaults
+  source("S:/Old Orchard/Development/R/mdpr_package/db_config.R")
+  
+  #Default dates based on date that package is loaded
+  c_close_date <- Sys.Date()
+  c_close_date <- as.Date(dbQuery(paste0(
+                    "SELECT CalendarDate
+                    FROM [Architect].[dbo].[CAL_BusDay]
+                    WHERE NextBusinessDate = '", c_close_date, "'")))  
+  c_as_of_datetime <- Sys.time()
+  lubridate::hour(c_as_of_datetime) <- 23;
+  lubridate::minute(c_as_of_datetime) <- 59;
+  lubridate::second(c_as_of_datetime) <- 59
+}
+
 
 # Traders and Accounts ----------------------------------------------------
 
@@ -47,3 +59,45 @@ c_tsy_hedges <- factor(c_tsy_hedges, levels = c_tsy_hedges)
 # Analysis Defaults -------------------------------------------------------
 
 c_curve_shocks_default <- seq(-1.00, 1.00, by = 0.10)
+
+
+# Lookup Tables -----------------------------------------------------------
+tax_status_lookup <- data.frame(muni_tax_prov = 
+                                  c("AMT/ST TAX-EXEMPT",
+                                    "AMT/ST TAXABLE",
+                                    "AMT/ST&CMWLTH TAX-EXMPT",
+                                    "FED & ST TAX-EXEMPT",
+                                    "FED AMT FOR INDIVIDUALS",
+                                    "FED BF/CMWLTH TAX-EXMPT",
+                                    "FED BF/ST & PR TAX-EXMPT",
+                                    "FED BQ",
+                                    "FED BQ/ST TAX-EXEMPT",
+                                    "FED BQ/ST TAXABLE",
+                                    "FED TAX-EXEMPT",
+                                    "FED TAX-EXEMPT/ST TAXABLE",
+                                    "FED TAXABLE",
+                                    "FED TAXABLE/CMWLTH EXMPT",
+                                    "FED TAXABLE/ST TAX-EXEMPT",
+                                    "FED TAXABLE/ST TAXABLE",
+                                    "FED TAXABLE/ST&PR EXMPT",
+                                    "FED/ST/CMWLTH TAX-EXMPT"),
+                                tax_status =
+                                  c("EXEMPT",
+                                    "EXEMPT",
+                                    "EXEMPT",
+                                    "EXEMPT",
+                                    "EXEMPT",
+                                    "TAXABLE",
+                                    "TAXABLE",
+                                    "EXEMPT",
+                                    "EXEMPT",
+                                    "EXEMPT",
+                                    "EXEMPT",
+                                    "EXEMPT",
+                                    "TAXABLE",
+                                    "TAXABLE",
+                                    "TAXABLE",
+                                    "TAXABLE",
+                                    "TAXABLE",
+                                    "EXEMPT")
+                                )

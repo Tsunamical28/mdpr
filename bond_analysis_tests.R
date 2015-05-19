@@ -76,8 +76,6 @@ bbg_bma_data <- bbg_bma_data %>%
 bma_spline <- smooth.spline(bbg_bma_data[["tenor"]], bbg_bma_data[["rate"]])
 
 
-
-
 bbg_data <- rename(bbg_data, 
                    cusip = ID_CUSIP,
                    yellow_key = MARKET_SECTOR_DES,
