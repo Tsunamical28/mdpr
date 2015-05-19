@@ -18,13 +18,14 @@ load_config <- function (filename) {
 }
 
 # Startup defaults --------------------------------------------------------
-
+mdpr_globals <- new.env()
 # Database Defaults -----------------------------------------------------
 db_configs <- load_config("S:/Old Orchard/Development/R/mdpr_package/db_config.txt")
-c_server <- db_configs$c_server
-c_database <- db_configs$c_database
-c_uid <- db_configs$c_uid
-c_pwd <- db_configs$c_pwd
+
+assign("c_server", db_configs$c_server, mdpr_globals)
+assign("c_database", db_configs$c_database, mdpr_globals)
+assign("c_uid", db_configs$c_uid, mdpr_globals)
+assign("c_pwd", db_configs$c_pwd, mdpr_globals)
 
 
 #Default dates based on date that package is attached
@@ -43,15 +44,19 @@ c_pwd <- db_configs$c_pwd
 
 c_trader_inits <- c("RJ", "LF", "MB", "EM", "MXA", "OOC", "GHC")
 c_trader_inits <- factor(c_trader_inits, levels = c_trader_inits)
+assign("c_trader_inits", c_trader_inits, mdpr_globals)
 
 c_exempt_accounts <- paste0(c_trader_inits, "-EX")
 c_exempt_accounts <- factor(c_exempt_accounts, levels = c_exempt_accounts)
+assign("c_exempt_accounts ", c_exempt_accounts, mdpr_globals)
 
 c_taxable_accounts <- paste0(c_trader_inits, "-TAX")
 c_taxable_accounts <- factor(c_taxable_accounts, levels = c_taxable_accounts)
+assign("c_taxable_accounts", c_taxable_accounts, mdpr_globals)
 
 c_tsy_accounts <- paste0(c_trader_inits, "-TSY")
 c_tsy_accounts <- factor(c_tsy_accounts, levels = c_tsy_accounts)
+assign("c_tsy_accounts", c_tsy_accounts, mdpr_globals)
 
 
 # Bloomberg Fields --------------------------------------------------------
@@ -61,6 +66,7 @@ c_muni_bbg_fields <- c("ID_CUSIP","MARKET_SECTOR_DES", "ISSUER_BULK",
                        "MATURITY","WORKOUT_DT_BID", "NXT_CALL_DT", 
                        "NXT_CALL_PX", "SETTLE_DT", "STATE_CODE",
                        "CPN_TYP","MUNI_TAX_PROV")
+
 
 c_bma_tenors <- c(1:5, 7, 10, 12, 15, 20, 25, 30)
 c_bma_securities <- paste0("USSMSB", c_bma_tenors, " Curncy")
@@ -124,3 +130,8 @@ tax_status_lookup <- data.frame(muni_tax_prov =
                                     "EXEMPT")
 )
 
+
+
+.onAttach(libname, pkgname){
+  attach(mdpr_globals)
+}
