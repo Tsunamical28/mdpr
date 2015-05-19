@@ -27,7 +27,6 @@ c_uid <- db_configs$c_uid
 c_pwd <- db_configs$c_pwd
 
 
-
 #Default dates based on date that package is attached
 #   c_close_date <- Sys.Date()
 #   c_close_date <- as.Date(dbQuery(paste0(
