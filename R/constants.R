@@ -13,7 +13,7 @@
   c_database <- get("c_database", envir = db_configs)
   c_uid <- get("c_uid", envir = db_configs)
   c_pwd <- get("c_pwd", envir = db_configs)
-}
+
   
   #Default dates based on date that package is attached
 #   c_close_date <- Sys.Date()
