@@ -1,6 +1,7 @@
 # Cashflow Functions ------------------------------------------------------
 #' Create vector of cashflow amounts
 #' 
+#' 
 #' @family cashflows
 #' 
 #' @param num Number of cashflows
